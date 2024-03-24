@@ -1,0 +1,10 @@
+[Unit]
+Description=i3 layouts config
+
+[Service]
+Type=simple
+StandardOutput=journal
+ExecStart=/home/moux/.local/bin/i3-layouts
+
+[Install]
+WantedBy=default.target

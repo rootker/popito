@@ -1,0 +1,166 @@
+!!            LOG > opened on Sat, Jan 21 14:33:10 2023  
+14:34   tsokkur71 > has joined.
+14:34             ! Total: 1 ops, 0 halfops, 0 voices, 1472 normal
+14:34 Join to #archlinux was synced in 5 secs
+14:34 drathir_tor > has joined.
+14:33   tsokkur71   i have this problem 
+14:33   tsokkur71   vim: /usr/lib/libtiff.so.5: no version information available (required by /usr/lib/libgdk_pixbuf-2.0.so.0)
+14:35         mtn > has joined.
+14:35      iyanmv > has joined.
+14:35        buzo > has joined.
+14:35  gnaggnoyil > has joined.
+14:35   Namarrgon   update your system, rebuild any unofficial packages
+14:36  gr33n7007h < has quit.
+14:35   tsokkur71   ok thanks
+14:36   fedorafan > has joined.
+14:37  gnaggnoyil   Which version of gcc is the current `linux-rt-lts` package built from? Is this compatible with current gcc version?
+14:37 loathingker < has quit.
+14:38  gnaggnoyil   `dkms` reports "incompatible gcc/plugin versions" when building kernel modules for `linux-rt-lts` kernel. E.g. when installing `nvidia-dkms`
+14:38 operadicman < has quit.
+14:38       chown < has quit.
+14:38   Namarrgon   it should also tell you which versions were used for both in the build log
+14:39    fancieux > has joined.
+14:39      LemanR > has joined.
+14:39   Namarrgon   but if it complains you already know it wasn't the same version you have installed
+14:38   tsokkur71   Namarrgon: is there a way to see size of all package installed it once ?
+14:39     flower_ > has joined.
+14:38   tsokkur71   not separated just size of all package installed in system
+14:39    flower__ > has joined.
+14:40   Namarrgon   tsokkur71: nothing built into pacman, you can get the individual sizes from e.g. 'expac' and then sum them up
+14:40   Namarrgon   the wiki might have a oneliner
+14:40  gr33n7007h > has joined.
+14:39   tsokkur71   Namarrgon: but there no way to see all size in once not seprated package by package ?
+14:41  Hydragyrum < has quit.
+14:41             ! mei is now known as Guest6473.
+14:41   Guest6473 < has quit.
+14:41   Namarrgon   no
+14:41         mei > has joined.
+14:41   shaggysi0 < has quit.
+14:41        nzeo < has quit.
+14:40   tsokkur71   Namarrgon: you should guys build that feature into pacman or in expac that show size of all package it once
+14:42       Tr4sK > has joined.
+14:43      pjbass < has quit.
+14:44      LemanR   Couldn't you get a list of all packages, dependencies then do something like df on those locations (can be found with whereis) and get some sort of summation. Just brain storming. But I don't think it's really needed in pacman though
+14:44   Namarrgon   tsokkur71: i don't care about a feature like that either way but what would it be useful for?
+14:44      vardo_ > has joined.
+14:44  gnaggnoyil   Namarrgon: Oops just noticed that. With `nvidia-dkms` I saw the the following warning at the start of the log: warning:
+14:44  gnaggnoyil   warning: the compiler differs from the one used to build the kernel 
+14:44  gnaggnoyil     The kernel was built by: gcc (GCC) 12.2.0 
+14:44  gnaggnoyil     You are using:           cc (GCC) 12.2.1 20230111
+14:44   flower___ > has joined.
+14:44      LemanR   related question, what is the use case here? I'm curious why this is wanted.
+14:45      jinsun > has joined.
+14:45         kts < has quit.
+14:45   Namarrgon   gnaggnoyil: was the warning fatal or did dkms build the modules anyway?
+14:44   tsokkur71   Namarrgon: to knwo how much all package used of space so we can manage that storage if i do du -hs /home/ to see all stroge in home but how about packages i should go one by one or i reinstall system to be clean again it will be really usefull we have that feature
+14:45 loathingker > has joined.
+14:46       gitly < has quit.
+14:46      LemanR   For managing storage I <3  filelight
+14:46  Hydragyrum > has joined.
+14:47         mtn < has quit.
+14:48        wudu > has joined.
+14:47   tsokkur71   LemanR: but to we have something built in it will be very usefull
+14:48      pjbass > has joined.
+14:48       gitly > has joined.
+14:48      pjbass < has quit.
+14:49        Tom^ < has quit.
+14:49  gnaggnoyil   Namarrgon: The warning itself isn't marked as fatal but the following build events did exit with an error, with many error messages being "cc1: error: incompatible gcc/plugin versions"
+14:49        Tom^ > has joined.
+14:49   Namarrgon   then the kernel needs a rebuild
+14:49      LemanR   tsokkur71 but what's with the fixation of having it built in? why is having a separate package for this function a bad thing? You'd think if I can have Function X being equally effective if it's modular or baked into the package manager then it's better for it to be modular.
+14:52  gnaggnoyil   Namarrgon: So should we submit a bug report and request a rebuild?
+14:54        hugo < has quit.
+14:53   tsokkur71   LemanR: filelight it really usefull do you any other usefull tools for notetaking or todo or any usefull ?
+14:54 terminalpus > has joined.
+14:55      LemanR   for this we should probably move out of arch main chat. I have to find the name for the random chat. But as a Master's student I have (what I feel to be) a great workflow.
+14:55      pjbass > has joined.
+14:56      LemanR < has quit.
+14:56  ProperNoun > has joined.
+14:57      LemanR > has joined.
+14:57  NetSysFire < has quit.
+14:56   tsokkur71   LemanR: What's main chat called ?
+14:57      LemanR   tsokkur71 for chatting about also tools we can move to archlinux-offtopic as it's not really archlinux focused (more like linux focused)
+14:57        dbal > has joined.
+14:57   tsokkur71   LemanR: go
+14:58  NetSysFire > has joined.
+14:58        dbal < has quit.
+14:59        dbal > has joined.
+14:59      IZEASG < has quit.
+15:01      IZEASG > has joined.
+15:01        dbal < has quit.
+15:01        hugo > has joined.
+15:03   flower___ < has quit.
+15:04    flower__ < has quit.
+15:04     flower_ < has quit.
+15:04       Widea > has joined.
+15:04     WAR10CK > has joined.
+15:04       Widea < has quit.
+15:06 Laborratte5 > has joined.
+15:07   Namarrgon   gnaggnoyil: yea
+15:08     flower_ > has joined.
+15:09    necercis < has quit.
+15:10     remedan < has quit.
+15:10         kzd > has joined.
+15:11       Tr4sK < has quit.
+15:11        dbal > has joined.
+15:11      float3 > has joined.
+15:12       Tr4sK > has joined.
+15:13      laocid > has joined.
+15:13    flower__ > has joined.
+15:13   flower___ > has joined.
+15:13      davis0 > has joined.
+15:14      nosoul < has quit.
+15:16        dbal < has quit.
+15:16      lambda < has quit.
+15:17      lambda > has joined.
+15:18         kts > has joined.
+15:20      mavrix > has joined.
+15:20        nzeo > has joined.
+15:20      Kruppt > has joined.
+15:22 radu2427534 > has joined.
+15:23   flower___ < has quit.
+15:23    flower__ < has quit.
+15:23     flower_ < has quit.
+15:25       aombk < has quit.
+15:25  alexherbo2 > has joined.
+15:25    necercis > has joined.
+15:28      foxxx0 < has quit.
+15:29       aombk > has joined.
+15:30      pjbass < has quit.
+15:30      pjbass > has joined.
+15:32 frostschutz > has joined.
+15:32      foxxx0 > has joined.
+15:33  emmanuelux > has joined.
+15:34       fflam < has quit.
+15:35  gnaggnoyil < has quit.
+15:35      IZEASG < has quit.
+15:36      IZEASG > has joined.
+15:36      float3 < has quit.
+15:36       fflam > has joined.
+15:37       eirik > has joined.
+15:37    wingsorc < has quit.
+15:39    jinsun__ > has joined.
+15:39             ! jinsun is now known as Guest9335.
+15:39   Guest9335 < has quit.
+15:39             ! jinsun__ is now known as jinsun.
+15:39 radu2427534 < has quit.
+15:45      jinsun < has quit.
+15:45      jinsun > has joined.
+15:46  emmanuelux < has quit.
+15:46     nortega > has joined.
+15:48      jinsun < has quit.
+15:48      jinsun > has joined.
+15:49    fancieux < has quit.
+15:50    jinsun__ > has joined.
+15:50      jinsun < has quit.
+15:50             ! jinsun__ is now known as jinsun.
+15:50        kr4z > has joined.
+15:51      carsme < has quit.
+15:53       zostj > has joined.
+15:54      carsme > has joined.
+15:55    luigibu1 > has joined.
+15:56 fiddlinmacx > has joined.
+15:56     johndvd < has quit.
+15:58    fancieux > has joined.
+16:00       Antiz > has joined.
+!!            LOG > closed on Sat, Jan 21 16:04:02 2023  

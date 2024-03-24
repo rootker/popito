@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+WIFI_NAME=$(iwgetid -r)
+ON_ICON=" "
+OFF_ICON=" "
+TAIL="#[fg=colour237] ⦁ "
+
+[ "$WIFI_NAME" = "$OFF_ICON" ] && printf "#[fg=red]%s" "$WIFI_NAME$TAIL" || printf "%s" "$WIFI_NAME$TAIL"

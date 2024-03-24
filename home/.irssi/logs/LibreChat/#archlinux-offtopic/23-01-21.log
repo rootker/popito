@@ -1,0 +1,109 @@
+!!            LOG > opened on Sat, Jan 21 14:57:05 2023  
+14:58   tsokkur71 > has joined.
+14:58             ! Total: 2 ops, 0 halfops, 6 voices, 342 normal
+14:57   tsokkur71   hi LemanR 
+14:58 Join to #archlinux-offtopic was synced in 11 secs
+14:57   tsokkur71   LemanR: tell me about some usefull tools
+14:58  NetSysFire > has joined.
+14:59      LemanR   yup here. Alright folks we be talking about workflow. Mine is centered on the riverwm windows manager, emacs and gimp with a bash script I made.
+14:58   tsokkur71   LemanR: greate bro
+14:59      LemanR   need to read the rules to see if using wgetpaste is allowed in offtopic (probably not I'd imagen)
+14:59      IZEASG < has quit.
+14:59   tsokkur71   whats do you use for notetaking and todo?
+15:00      LemanR   emacs, the almighty emacs
+15:01      IZEASG > has joined.
+15:00   tsokkur71   LemanR: i use i3-gaps and termite and polybar
+15:01      LemanR   I'm looking to see if I can just use wgetpaste so you can copy/paste my config. I highly recommend watching the youtuber Systems Crafter as he dives very deep into emac packages, features and learning how to hack away at it to customize it.
+15:01   tsokkur71   LemanR: upload your config to 0x0 or similar site
+15:01   tsokkur71   and paste link
+15:06    pintert3 > has joined.
+15:07      LemanR   trying to figure out the 0x0.st method as it actually looks pretty cool (using via curl as I am beginning to study web security as a hobby)
+15:07      LemanR   I did 'curl -F 'file=@-' 0x0.st < ./.emacs.d/init.el' not really sure why that failed (I just got a link to a white page)
+15:07   tsokkur71   LemanR: let me show you
+15:08      LemanR   maybe has to be .init.txt instead of .el (maybe it doesn't know what to do with .el extension?)
+15:07   tsokkur71   no file=@nameofile
+15:08   tsokkur71   not < nameoffile
+15:08   tsokkur71   do like this
+15:08   tsokkur71   curl -F 'file@./.emacs.d/init.el' 0x0.st
+15:11      float3 > has joined.
+15:12      LemanR   btw when I do post the .el, if you run that file in emacs it will download & install all the packages AND execute all the code that is used to customize emacs. I only use 3 repositories that are generally trusted. So just a warning there, as soon as you execute it, it won't ask you........that's probably something I should add huh?
+15:13      LemanR   *run as in execute the elisp code which you have to do manually*
+15:13   tsokkur71   LemanR: you may want to create bash script with flags for example to check package to build package from repo or to install and copy dotfiles
+15:15   tsokkur71   LemanR: - used for stdin for example if you do ps -aux you will so that text it been cut but if you do ps -aux | cat - this will not be cut
+15:16      lambda < has quit.
+15:17      LemanR   -.- why is this curl thing so painful lol. I swear I'll learn it, eventually
+15:17      lambda > has joined.
+15:18         kts > has joined.
+15:17   tsokkur71   LemanR: hhhhhhh
+15:19      LemanR   tried curl -F 'file=@./.emacs.d/init.el' 0x0.st < ./.emacs.d/init.el but got white page, thin did that without the at symbol and got segmentation fault
+15:20        nzeo > has joined.
+15:19   tsokkur71   no without <
+15:19   tsokkur71   just run this curl -F 'file=@~/.emacs.d/init.el' 0x0.st
+15:21   tsokkur71   LemanR: another thing path should be full
+15:21   tsokkur71   curl -F 'file=@/home/yourusername/.emacs.d/init.el' 0x0.st
+15:21   tsokkur71   replace yourusename with name you have in linux
+15:21   tsokkur71   and it will work now
+15:24      LemanR   I didn't know this cause I'm a moron, a lot of them was working but I was expecting the file to show up in the browser like wgetpaste does. I downloads the file which when opened shows the expected content.....btw how is this safer than wgetpaste methed?
+15:24      LemanR   or preferred
+15:24      LemanR   well http://0x0.st/ohYv.bin that should work apparently
+15:24   tsokkur71   LemanR: finnaly <3
+15:25   tsokkur71   LemanR: i use 0x0 to upload any file to share because file will be deleted automatic i thing after 24H
+15:25   tsokkur71   that why it safer
+15:25   tsokkur71   it not keeping files or logs
+15:27      LemanR   so that's my config. Now to help manage this I also make a file in org mode that is organized and "tangled" with this. You'll have to learn how to use that (again watch System Crafters, amazing channel).
+15:28      LemanR   0x0.st/ohYY.org
+15:28   tsokkur71   LemanR: thanks bro for config
+15:29      LemanR   so for first time I run the first init.el file inside of emacs. Then you should be able to place the config version in the same directory and use that to modify init. lastly I use .emacs for other customizations.
+15:29      LemanR   https://0x0.st/ohYg.txt
+15:30      LemanR   technically this one can and should be reduced by just putting a lot of those codes into the config, but I've just been lazy and not thinking about that until just now.
+15:31      LemanR   basically .emacs is one of the first files emacs will load. In fact to get my init.el (the "real" config file) to load automatically when running emacs you'll see a line that says (load-file "path to .init.el" )
+15:33      LemanR   tsokkur71 but maybe *look at the files first*. Because this means that if you download/install emacs, place the files in the right location, then run emacs, .emacs will load .emacs.d/.init.el which will then download & install those packages automatically
+15:33      LemanR   *look at the files first*
+15:32   tsokkur71   LemanR: Thanks for sharing <3
+15:34      LemanR   .emacs.d/init.el will not automatically execute if you do not have the (load-file......) command so maybe open it in a text editor and comment it out. In elisp ; is used for comments.
+15:35      IZEASG < has quit.
+15:35      LemanR   but everything in .emacs automatically executes when running emacs. so the other lines will run.....infact....just don't use .emacs for now unless you trust/run the init first XD  just to avoid errors when opening emacs lol
+15:36      IZEASG > has joined.
+15:36      float3 < has quit.
+15:35   tsokkur71   LemanR: i use vim
+15:35   tsokkur71   LemanR: and for notetaking i did create bash script 
+15:36   tsokkur71   and for todo i did create bashscript to let me show you
+15:37       eirik > has joined.
+15:37      LemanR   tsokkur71 well I made a bash script for drag/drop screen shotting in wayland. it uses grim and slurp I think. Then it ask if you want to mod the new picture file in gimp.
+15:36   tsokkur71   LemanR: http://0x0.st/ohYk.png
+15:38      LemanR   then in emacs it's really easy to create a link to that file which opens in a buffer.
+15:37   tsokkur71   This is my todo i did make
+15:37   tsokkur71   LemanR: share screenshot
+15:39      LemanR   btw...emacs has a package for vim keybindings. so you don't even have to change what you've learned with vim
+15:39   tsokkur71   LemanR: whats about plugins in vim ?
+15:41      LemanR   well I'm not familiar with vim myself. Like I know that it is and just so happen to know enough to know emacs is better :p  (joking of course) but this is a good starting point https://www.emacswiki.org/emacs/Evil
+15:41       phrik   Title: EmacsWiki: Evil (at www.emacswiki.org)
+15:42      LemanR   I really should use evil mode as well. vim is pretty standard to linux systems and probably more than that.
+15:43      LemanR   actually that link has a plugins section. But there is probably more out thehre
+15:42   tsokkur71   LemanR: yes i may try emacs evil mode there some plugins i use daily
+15:44      LemanR   now this is system crafters. One of his focuses is on emacs but the overall concept is software that is generally "hackable" or allows users to customize. https://www.youtube.com/watch?v=zx_wItkicKE
+15:44       phrik   Title: Configuring Sway with Scheme - System Crafters Live! - YouTube (at www.youtube.com)
+15:45      LemanR   I chose that link because he is experimenting with customizing sway using scheme code. incase you want to move from i3 to sway at some point. Although you probably don't need the scheme part
+15:45   tsokkur71   LemanR: i may try to switch that right i been using i3 for 2 years
+15:45   tsokkur71   maybe it time for me to move in
+15:47   tsokkur71   LemanR: it seems that sway config almost like i3 ?
+15:48   Namarrgon   the i3 config mostly works if you drop it into sway
+15:49      LemanR   I mean X and Xorg will still be good for at least a few years to come. I heard that you can just drop your current config into sway and it should just work. But I use riverwm personally. Lastly here is the screen shot script I made https://0x0.st/ohYn.sh
+15:49      LemanR   it uses gimp, grim and slurp so consider those dependencies but that file only does the screen shot (no auto download or anything like that)
+15:49    fancieux < has quit.
+15:50        kr4z > has joined.
+15:51      carsme < has quit.
+15:51   tsokkur71   Namarrgon: that whats i did see they use same config maybe just say more advanced with new features
+15:52   tsokkur71   LemanR: in line 3 you should use -f to check if file exts then do grim 
+15:54      carsme > has joined.
+15:54    MacGyver   I'll switch when it reaches feature parity.
+15:54      LemanR   tsokkur71 eh feel free to add that. I like that it just overwrites. It's meant to ask only the basic needed questions to get the file, place it in location you want, allow you to mod it then you're good.
+15:53   tsokkur71   and in line 7 use || for Y or yes and you should add else and add getopts for example nameofscript.sh file it will be better
+15:54    MacGyver   At least for the features I care about.
+15:55    MacGyver   Layout restoration and window (NOT screen) capture being the primary two blockers atm.
+15:54   tsokkur71   MacGyver: i may switch to sway today for new features 
+15:55      LemanR   and to emacs XD
+15:55      LemanR   team emacs lol
+15:55      LemanR   sorry guys I like the vim vs emacs meme to much lol
+15:58    fancieux > has joined.
+!!            LOG > closed on Sat, Jan 21 16:04:02 2023  

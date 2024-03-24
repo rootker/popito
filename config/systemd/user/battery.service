@@ -1,0 +1,7 @@
+[Unit]
+Description=Check battery
+
+[Service]
+Type=simple
+ExecStart=/home/tsokkur/.local/bin/cron/battery.sh
+

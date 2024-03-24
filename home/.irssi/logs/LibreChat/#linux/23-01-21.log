@@ -1,0 +1,234 @@
+!!            LOG > opened on Sat, Jan 21 14:35:31 2023  
+14:36   tsokkur71 > has joined.
+14:36             ! Total: 0 ops, 0 halfops, 0 voices, 2087 normal
+14:36 Join to #linux was synced in 8 secs
+14:37        iliv > has joined.
+14:36   tsokkur71   i have created this tool that use openai api using c++ it really usefull you should try it guys and leave star please
+14:37   fedorafan > has joined.
+14:36   tsokkur71   https://github.com/rootker/chatgpt-cli
+14:37        halv > has joined.
+14:38 operadicman < has quit.
+14:38    Vector_X > has joined.
+14:38    Vector_X   hi
+14:38 chromebitti   hey
+14:38  anon545678 < has quit.
+14:38       madam < has quit.
+14:39        jatt < has quit.
+14:40  iamkarlson > has joined.
+14:40  gr33n7007h > has joined.
+14:41      Inline > has joined.
+14:41  iamkarlson < has quit.
+14:41             ! mei is now known as Guest6473.
+14:41   Guest6473 < has quit.
+14:41         mei > has joined.
+14:41             ! Inline is now known as Guest4047.
+14:41         jmd < has quit.
+14:41   Guest4047 < has quit.
+14:42       lowfi > has joined.
+14:42         Wh0 < has quit.
+14:42      Inline > has joined.
+14:42        halv < has quit.
+14:42             ! Inline is now known as Guest9116.
+14:43     Leopold < has quit.
+14:43       Tonux < has quit.
+14:43   Guest9116 < has quit.
+14:43  iamkarlson > has joined.
+14:43             ! +o litharge
+14:42             ! -bo $a:gargantua$##fix_your_connection litharge
+14:44      beaver > has joined.
+14:45      jinsun > has joined.
+14:45         kts < has quit.
+14:45      Inline > has joined.
+14:46       barzo > has joined.
+14:46     comlord < has quit.
+14:46         Wh0 > has joined.
+14:47     comlord > has joined.
+14:47       lowfi < has quit.
+14:47     Leopold > has joined.
+14:48        wudu > has joined.
+14:48       delay > has joined.
+14:48      RFBear < has quit.
+14:48       ioria > has joined.
+14:49    pableras < has quit.
+14:49        Tom^ < has quit.
+14:49       velix   I want to keep the first 18 characters of each filename, but I'm failing with the pathname. I'm using this in find, anyone with an idea, how to preverse the pathname (and extension) and just change the filename?  -exec rename -n -v 's/^(.{18}).*(\..*)$/$1$2/' {} +
+14:49        Tom^ > has joined.
+14:50       velix   ah, execdir!
+14:50       velix   thx
+14:50       velix   ^thanks.
+14:50     Leopold < has quit.
+14:50     Leopold > has joined.
+14:51             ! MetalRat- is now known as MetalRat.
+14:51  iamkarlson < has quit.
+14:53 grub-reinst > has joined.
+14:54 terminalpus > has joined.
+14:55       Tonux > has joined.
+14:56  ProperNoun > has joined.
+14:57      ross3_ > has joined.
+14:58  bywaterloo > has joined.
+14:59 jfsimon1981 < has quit.
+14:59         Wh0 < has quit.
+14:59      ExeciN > has joined.
+15:00         Wh0 > has joined.
+15:00      jacobk > has joined.
+15:00     Dr_Coke < has quit.
+15:00     acerbic > has joined.
+15:00        Kerr > has joined.
+14:59   tsokkur71   velix: why you using $1 ? and $2
+15:00      ExeciN < has quit.
+15:01      ExeciN > has joined.
+15:00   tsokkur71   's/search/replace/' so 's/$1/$2/'
+15:01       velix   tsokkur71: Too late to think about it, I've processed 293 files only ;)
+15:01 chromebitti < has quit.
+15:01   tsokkur71   velix: hhh ok
+15:02       velix   () = caption group, I've got 2 caption groups.
+15:03    Two_Dogs < has quit.
+15:03   hexnewbie   Chiester: Indeed, upgrading through terminal does not require reboots on the same system. But the GNOME OSD keyboard lacks arrow keys, among others, making the terminal truly difficult to use there
+15:03    han-solo < has quit.
+15:04     WAR10CK > has joined.
+15:06        hack < has quit.
+15:06 Laborratte5 > has joined.
+15:06   hexnewbie   (And KDE doesn't ask for reboot either, even if Plasma Discover is buggy, and KDE/Qt are nearly useless on a touchscreen, I want to throw things by just using two Qt apps on it)
+15:07  iamkarlson > has joined.
+15:07  iamkarlson < has quit.
+15:08   hexnewbie   “The goal of Computer Science is to build something that will last at least until we've finished building it”
+15:09      rascul   computer science is the worst
+15:09      rascul   them people can't even make a non-buggy hello world
+15:10     remedan < has quit.
+15:10   hexnewbie   I can: import os; sys.stdout.write(b"Helo worl")
+15:10        Kerr < has quit.
+15:12      Syroth > has joined.
+15:12   hexnewbie   I can also do it in C: #include <stdlib.h> void main() { char *msg = "%s% Hello World %s%"; printf(msg); return 0; };
+15:13      laocid > has joined.
+15:13      rascul   wow the python one is buggy
+15:13      rascul   won't even run as is ;)
+15:13       delay < has quit.
+15:14 perrierjoue   how to repair zfs https://bpa.st/ALY7Q
+15:14   hexnewbie   perrierjouet: Restore file from backups?
+15:14      rascul   hexnewbie ahh the c one doesn't have the bug i expected
+15:14      rascul   good job
+15:15   hexnewbie   rascul: Now I'm curious, which potential mistake did I miss?
+15:15      rascul   >/dev/full and $? should not be zero
+15:16      ExeciN < has quit.
+15:16 perrierjoue   hexnewbie: my zpool status https://termbin.com/ev8v
+15:16   wowbagger > has joined.
+15:17      rascul   a message on stderr would be nice but not necessarily required as long as main() returns non-zero
+15:17   hexnewbie   perrierjouet: Yes, it tells you what to do. Rescrubbing with hopes it will repair the file on the second run (I'm surprised this happens when there's a mirror available, but a mirror is not backup) may help, according to web searches which I'm sure you ran
+15:18       delay > has joined.
+15:18  iamkarlson > has joined.
+15:18         kts > has joined.
+15:18  sammelweis < has quit.
+15:19 DibbTubberO > has joined.
+15:19   hexnewbie   rascul: Python always throws up errors if it can't write to stdout (or even stderr), yes. I consider it a nuisance rather than correct behaviour in many cases (it used to break services whose stdout disconnected, before systemd came along and redirected those to the journal).
+15:19   hexnewbie   For Hello World, I'd assume it is the correct one, though
+15:20      rascul   yep the python one whined very loudly
+15:20      rascul   but it did return 0 exit code though
+15:20       madam > has joined.
+15:20  sammelweis > has joined.
+15:20      rascul   could cause a pipeline to go wonky
+15:20      Kruppt > has joined.
+15:20 perrierjoue < has quit.
+15:20   BootLayer < has quit.
+15:20      jmo707 > has joined.
+15:22       delay < has quit.
+15:22      ImQ009 > has joined.
+15:23 radu2427534 > has joined.
+15:24   iomari891 < has quit.
+15:25       aombk < has quit.
+15:25     comlord < has quit.
+15:25    Your_Dog > has joined.
+15:25       erica < has quit.
+15:26    han-solo > has joined.
+15:27      jmo707 < has quit.
+15:28       wmute < has quit.
+15:28      Thuryn < has quit.
+15:29      Smiles < has quit.
+15:29     acerbic < has quit.
+15:29       aombk > has joined.
+15:30        hack > has joined.
+15:30 jfsimon1981 > has joined.
+15:31     Helenah   hexnewbie: If an exception is being thrown that you just want to pass on then you could always put "pass" into an "except" statement.
+15:31       wmute > has joined.
+15:32 frostschutz > has joined.
+15:32   hexnewbie   Helenah: I need to wrap every print call in a particular exception block. Might as well switch to using the logging module, which is more work but already ignores exceptions
+15:33       MrTek < has quit.
+15:33     Helenah   hexnewbie: I wrote my own logging easily, why not have the print done within the logger functions?
+15:33   hexnewbie   Or the the daemon with >/dev/null 2>/dev/null, or with systemd
+15:33        kabe < has quit.
+15:33  emmanuelux > has joined.
+15:33     Helenah   That way you don't have to keep repeating "print" surrounding it by try and except, it's already done when the logger is called.
+15:33   hexnewbie   Which would avoid crashes if some third-party module decides to print things
+15:34      rascul   log all the things
+15:34      Inline < has quit.
+15:34      rascul   (at the proper log level)
+15:34  iamkarlson < has quit.
+15:34   hexnewbie   logging.log(-100, "Adding x and y"); z = x + y
+15:35       MrTek > has joined.
+15:35     Helenah   hexnewbie: Is that how you're passing log entries? Into that function? So wouldn't your print be inside it which you'd only need one?
+15:35         bmr < has quit.
+15:35      rascul   that might be debug level
+15:35   hexnewbie   I think DEBUG is 10, but I forget
+15:35      rascul   different implementations do levels slightly different
+15:35      rascul   it seems
+15:35     Helenah   Oh, ah! Now I see!
+15:36      rascul   oh DEBUG is on line 10? 'GOTO 10' should do it
+15:36     Helenah   rascul: They do, for example mine you just do something like pass "INFO" or "DEBUG" or whatever to the logger.
+15:36     Helenah   and and the logger would report back if the level is invalid.
+15:37      rascul   in rust i typically have fancy macros i can use like info!("i like pie")
+15:37      rascul   it is very important to make an informative note in the log about whether you like pie or not
+15:37    wingsorc < has quit.
+15:38     Helenah   I found it soo easy to code loggers that it confused me why there are libraries that do this very thing. I suppose I'm that sort of person who wants to ensure they get only the banana if that's all they want but not the full package (monkey, banana, sunset and jungle). Like I don't like big frameworks for example because I think they're adding more to a project than one may require from one or a few
+15:38     Helenah   of its modules.
+15:39       delay > has joined.
+15:39    jinsun__ > has joined.
+15:39             ! jinsun is now known as Guest9335.
+15:39   Guest9335 < has quit.
+15:39             ! jinsun__ is now known as jinsun.
+15:39 radu2427534 < has quit.
+15:40  iamkarlson > has joined.
+15:40      rascul   yeah loggers can be easy
+15:41        tony > has joined.
+15:41      rascul   i'm probably ok with big frameworks if i'm actually using a large portion of its features
+15:41      unknow < has quit.
+15:41             ! tony is now known as Guest2505.
+15:43             ! tonyt is now known as tonyy.
+15:43       delay < has quit.
+15:43     esselfe   rascul you're a big framework
+15:44      rascul   the biggest
+15:44 Guest2505 tonyt@user/tonyt has changed host
+15:44             ! Guest2505 is now known as tonyt.
+15:45        _xor < has quit.
+15:45       lowfi > has joined.
+15:45  iamkarlson < has quit.
+15:45      ExeciN > has joined.
+15:45      jinsun < has quit.
+15:45      jinsun > has joined.
+15:46  emmanuelux < has quit.
+15:46    Two_Dogs > has joined.
+15:46 AlexKalopsi > has joined.
+15:47   iomari891 > has joined.
+15:47  iamkarlson > has joined.
+15:48      jinsun < has quit.
+15:48       reset < has quit.
+15:48      jinsun > has joined.
+15:48   cartdrige > has joined.
+15:50    jinsun__ > has joined.
+15:50      jinsun < has quit.
+15:50             ! jinsun__ is now known as jinsun.
+15:51        _xor > has joined.
+15:51       reset > has joined.
+15:52       lowfi < has quit.
+15:53     Helenah   rascul: That's how I am, I've to have good reason to use a large portion of its features and once I have that good reason, I'll use that big framework.
+15:53  iamkarlson < has quit.
+15:53     Helenah   Else it's a waste of resource used in a program.
+15:54     skapata > has joined.
+15:55 perrierjoue > has joined.
+15:57   hexnewbie   I find it unlikely that loading some bytecode of a few KiBs wastes resources
+15:57  iamkarlson > has joined.
+15:58 perrierjoue   https://termbin.com/iojqk
+16:00      Inline > has joined.
+16:00    lxsameer < has quit.
+16:01       erica > has joined.
+16:02    lxsameer > has joined.
+16:04     fatman_ < has quit.
+!!            LOG > closed on Sat, Jan 21 16:04:02 2023  

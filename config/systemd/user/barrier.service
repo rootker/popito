@@ -1,0 +1,15 @@
+[Unit]
+Description=Barrier Client mouse/keyboard share
+Requires=display-manager.service
+After=display-manager.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/barrierc --no-restart --name raspberrypi --enable-crypto 192.168.0.109
+Restart=always
+RestartSec=10
+User=tsokkur
+
+[Install]
+WantedBy=multi-user.target

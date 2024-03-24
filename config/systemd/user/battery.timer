@@ -1,0 +1,11 @@
+[Unit]
+Description=Run My Script every 15 minutes
+
+[Timer]
+
+OnBootSec=2m
+OnUnitActiveSec=15m
+Unit=battery.service
+
+[Install]
+WantedBy=timers.target
