@@ -1,0 +1,37 @@
+#compdef wa
+
+__wa() {
+    local curcontext="$curcontext" fileopts diropts cur prev
+    typeset -A opt_args
+    fileopts="-f|-r"
+    diropts="--cache-dir"
+    cur=$words[CURRENT]
+    case $cur in
+        :)
+            _arguments '*: :(::ytfavorites ::ytrecommended ::ytsubscriptions ::ytwatchlater ::ythistory)'
+        ;;
+        *)
+            prev=$words[CURRENT-1]
+            if [[ ${prev} =~ ${fileopts} ]]; then
+                _path_files
+            elif [[ ${prev} =~ ${diropts} ]]; then
+                _path_files -/
+            elif [[ ${prev} == "-v" ]]; then
+                _arguments '*: :(anime women cyberpunk nature random)'
+            elif [[ ${prev} == "-x" ]]; then
+                _arguments '*: :(anime women cyberpunk nature random)'
+            else
+	_arguments -C -s -S -n \
+                '(- 1 *)'{-d,--random}'[set random wallpaper or spcific directory]: :->full' \
+    		'(- 1 *)'{-v,--favorate}'[Favorate current wallpaper]:cheat:->cheats' \
+    		'(- 1 *)'{-x,--xarch}'[set wallpaper from favorate]: :->full' \
+    		'(- 1 *)'{-f,--file}'[set wallpaper from file]: :->full' \
+    		'(- 1 *)'{-r,--remove}'[delete current wallpaper]: :->full' \
+    		'(- 1 *)'{-s,--search,-ps}'[search for wallpaper <keywords>]: :->full' \
+    		'(- 1 *)'{-v,--version}'[display version and copyright information]: :->full' 
+    	    fi
+        ;;
+    esac
+}
+
+__wa
