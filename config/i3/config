@@ -37,7 +37,8 @@ bindsym Ctrl+Shift+Left 	exec $in mpc prev
 bindsym $mod+Alt+Right 		exec $in playerctl previous 
 bindsym $mod+Alt+Left 		exec $in playerctl next
 # Use Mouse+$mod to drag floating windows to their wanted position
-
+# open gmail in firefox
+bindsym $mod+. 			exec firefox https://mail.google.com/mail/u/0/#inbox 
 bindsym $mod+Shift+Return exec gtk-launch $(xdg-settings get default-web-browser)
 
 bindsym $mod+Shift+D exec --no-startup-id ~/.local/bin/qur -a
