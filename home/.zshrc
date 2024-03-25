@@ -557,6 +557,7 @@ bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 alias p="shred -u $@"
 alias pd="shred -r -u $@"
+alias wipe1="wipe -f -v -z $@"
 alias d="gdb -q"
 bindkey "\e[f" end-of-word
 bindkey '^Y' paste-last-arg
