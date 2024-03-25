@@ -567,5 +567,7 @@ alias opp='lsof -P -n -i tcp -s TCP:LISTEN'
 alias p5='php56 -S 127.0.0.1:8080'
 alias p7='php7 -S 127.0.0.1:8080'
 alias on="google-chrome-stable http://localhost/"$@
+alias v="vim $@"
+alias syn="sudo pacman -Syy"
 # comment
 # be in here
