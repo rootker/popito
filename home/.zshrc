@@ -13,7 +13,7 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 export XDG_CACHE_HOME=$HOME/.cache/
 export XDG_CONFIG_HOME=$HOME
 export GPG_TTY=$(tty)
-export CDPATH=$HOME/learning:~/.local:~:$HOME/.config:/etc:$HOME/Dropbox # cd with name in those directories
+export CDPATH=$HOME/personal/git:~/.local:~:$HOME/.config:/etc:$HOME/Dropbox # cd with name in those directories
 #source /usr/share/fzf/key-bindings.zsh
 #export LIBGL_ALWAYS_SOFTWARE=true
 #export XDG_RUNTIME_DIR=~
