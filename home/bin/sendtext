@@ -1,0 +1,65 @@
+#!/bin/sh
+set -e
+
+pass() {
+	gpg2 -q -d "${HOME}/.password-store/${1}.gpg"
+}
+
+my_number="$(pass Telephone/anders-twilio)"
+version=0.1
+
+show_help() {
+	echo "usage: ${0##*/} [OPTIONS] RECIPIENT1 [RECIPIENT2 ...]"
+	echo "will send stdin as a text message to each RECIPIENT via twilio."
+	echo "RECIPIENTs can be phone numbers with country prefix"
+	echo "(e.g. +45xxyyxxyy), or known aliases."
+	echo
+	echo "OPTIONS are one or more of the following:"
+	echo "   -h     show this message"
+}
+
+die() {
+	printf '%s\n' "$1" >&2
+	exit 1
+}
+
+send_twilio_text() {
+	response=$(curl -X POST --fail --show-error --silent \
+		"https://api.twilio.com/2010-04-01/Accounts/$(pass Online/twilio-account-sid)/Messages.xml"\
+		--data-urlencode "From=$my_number" \
+		--data-urlencode "To=$1" \
+		--data-urlencode "Body=$message" \
+		-u "$authstring" )
+	if [ $? -gt 0 ]; then
+		die "Failed to send SMS: $response"
+	fi
+}
+
+while :; do
+	case "$1" in
+		-h)
+			show_help
+			exit 0
+			;;
+		*)  # no more options
+			break
+	esac
+	shift
+done
+
+if [ $# -lt 1 ]; then
+	show_help
+	exit 1
+fi
+
+authstring="$(pass Online/twilio-account-sid):$(pass Online/twilio-auth-token)"
+message="$(cat)"
+for r in "$@"; do
+	case "$r" in
+		+[0-9]*)
+			to="$r";;
+		*)
+			to="$(pass Telephone/$r)";;
+	esac
+	send_twilio_text "$to"
+done

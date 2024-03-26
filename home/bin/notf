@@ -1,0 +1,7 @@
+#!/bin/bash
+maildirnew="~/.mail/gmail/[Gmail]/All Mail/new"
+new="$(find $maildirnew -type f | wc -l)"
+maildirold='/home/tsokkur/.mail/gmail/[Gmail]/All Mail/cur/'
+old="$(find $maildirold -type f | wc -l)"
+
+/usr/bin/notify-send --icon='/usr/share/icons/Adwaita/256x256/legacy/mail-message-new.png' -a "Mbsync" "New mail" "New: $new Old: $old"

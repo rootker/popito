@@ -1,0 +1,15 @@
+#!/bin/sh
+
+mpd_artist=$(mpc -f "%artist%" | head -1)
+mpd_title=$(mpc -f "%title%" | head -1)
+mpd_album=$(mpc -f "%album%" | head -1)
+
+MPD_MUSIC_PATH="~/.local/music"
+TMP_COVER_PATH="/tmp/mpd-track-cover.jpg"
+exiftool -b -Picture "/home/tsokkur/.local/music/$(mpc -p 6600 --format "%file%" current)" > "$TMP_COVER_PATH"
+
+image="/tmp/mpd-track-cover.jpg"
+
+#execute
+dunstify -a mpd -i "$image" " Artist : $mpd_artist
+ Song   : $mpd_title"

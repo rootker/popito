@@ -1,0 +1,7 @@
+#!/bin/env bash
+source $(ueberzug library)
+ImageLayer 0< <(
+	ImageLayer::add [identifier]="example0" [x]="0" [y]="0" [max_width]="30" [max_height]="30" [path]="$1"
+	#ImageLayer::add [identifier]="example0" [x]="$2" [y]="$3" [max_width]="$5" [max_height]="$4" [path]="$1"
+	read
+)

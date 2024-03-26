@@ -1,0 +1,429 @@
+#!/bin/bash
+Author="smokeroot"
+config="$HOME/.config/.note.cfg"
+if [ -f $config ];then
+	source $config
+else
+	echo "configuration file not exists"
+	touch $config
+	echo store="$HOME/.notes.db" >> $config
+	echo editor="vim" >> $config
+fi
+# Exit if fail
+set -o errexit
+set -e
+# Where Notes should be keep
+# if file not exists prompt to create new one
+if ! [ -f $store ];then
+	echo " [!] Notes File $store"
+	echo " [!] Making new One"
+	touch $store || echo "file didnt not created"
+	echo " [*] Done Making File"
+	exit 1
+fi
+# show help page
+help() {
+  cat <<EOF
+Description: Simple Note app
+Usage: note [flag] or note "Your Note Here"
+  #-u  Update
+  	-a or --add    | to add special charcater if normal mode not work
+  	-d or --delete | to delete note using line number
+	-c or --copy   | to copy note
+	-m or --merge  | to delete file
+	-e or --edit   | to edit file
+	-encrypt       | encrypt note file
+	-decrypt       | decrypt note file
+	-ta            | add note as todo like [x]
+	-tm            | make todo is as done
+	-tl            | list all todo notes
+        -tag           | add tag to note
+	-tas           | list tags
+	-event         | add event
+	-evel          | list events
+	-email         | send all notes to specific email	
+	-a or --add    | to add note
+	-v or --version| show version and exit
+	-s or --search | search on notes files
+	-l or --line   | grep specific line use -l for print lins
+	-h  Show this help and exit
+Examples:
+  note "Your Note here"
+EOF
+}
+# if arguments empty show help and exit
+# use copy mode with fzf
+copy() {
+	# check if fzf exists or note
+	if ! hash fzf 2>/dev/null;then
+	echo " You Need To install fzf"
+	exit
+else
+	cat $store|fzf|xclip -selection clipboard
+fi
+}
+# Encrypt a note
+encrypt_note() {
+  local password=$2
+  gpg --symmetric --output "$store.gpg" --passphrase "$password" "$store"
+}
+
+# Decrypt a note
+decrypt_note() {
+  local note_number=$1
+  local password=$2
+  gpg --output "$store" --passphrase "$password" "$store.gpg"
+}
+# Search and replace within a note
+search_replace() {
+  local note_number=$1
+  local search_term=$2
+  local replacement=$3
+  sed -i "s/$search_term/$replacement/g" "$store"
+}
+# Send a note via email
+send_email() {
+  local note_number=$1
+  local recipient=$2
+  local subject=$3
+  cat "$store" | mail -s "$subject" "$recipient"
+}
+#
+# Add an item to the to-do list
+
+# Add an item to the checklist
+add_checklist_item() {
+  local item=$2
+  echo "- [?] $item" >> "$store"
+}
+
+# Mark an item as complete
+mark_checklist_item_complete() {
+  local item_number=$2
+  sed -i "${item_number}s/?/x/" "$store"
+}
+
+# List the items in the checklist
+list_checklist_items() {
+  grep -E '^- \[.\]' "$store"
+}
+# Generate a report of your notes
+generate_report() {
+  local report_type=$2
+  case $report_type in
+    word_count)
+      wc -w "$store"
+      ;;
+    unique_words)
+      tr ' ' '\n' < "$store" | sort -u
+      ;;
+    average_note_length)
+      note_count=$(wc -l < "$store")
+      word_count=$(wc -w < "$store")
+      printf "%.2f\n" $(bc -l <<< "$word_count/$note_count")
+      ;;
+  esac
+}
+#
+# merge will earse data of file it encrypted using shred command with zeros
+delete(){
+	if [ -z $2 ];then
+		echo " [+] $sc -d Line Number ${2}"
+		exit
+	else
+		sed ${2}d -i $store
+		echo " [!] line $2 Deleted."
+		exit
+	fi
+}
+merge(){
+	echo " Note This Will Delete Note Forever"
+	read -p " [!] Are You sure : (y\n) " del
+	if [ "$del" = "y" ];then
+		echo " [!] Running Command Shred"
+		shred -z $store
+		rm $store
+		touch $store
+	else
+		echo " [!] Ok."
+		exit 0
+	fi
+	if [ $? == "0" ];then
+		echo " [*] File $store Hash Been Merged"
+	else
+		echo " [!] Somthing Not Right."
+	fi
+}
+# Argumants
+function add(){
+	read -ep "->_ " note
+	echo -e "${note}" | tee -a $store
+	echo -e "[\e[1;34m*\e[0m] DONE!!"
+}
+function search(){
+	if [ -z "$@" ];then
+	read -p "-> " serch
+	nl -w1 -s ': ' $store | grep -iE "$serch"
+	else
+	nl -w1 -s ': ' $store | grep -i "$@"
+	fi
+}
+function addnotefile(){
+dir="/home/moux/.ntki/"
+if [ ! -d $dir ];then
+    echo $dir
+    mkdir -p $dir || echo "somthing worng"
+fi
+#if [ ! -d $dirnotes ];then
+#    read -p "[!] Create $dirnotes : " tcr
+#    case $tcr in
+#        y|yes|Y|YES) mkdir -p $dirnotes && [[ -d $dirnotes ]] && echo "Directory is created" || echo "dir not created";;
+#        n|no|N|NO) echo "EXIT..." && exit;;
+#        *) echo "YES OR NO" && exit;;
+#    esac
+#fi
+if [ -z "$2" ];then
+    read -p "ENTER NAME : " filename
+    touch $dir/$filename
+    vim $dir/$filename
+    exit
+else
+    touch $2 $dirnotes
+    vim $dirnotes/$2
+fi
+}
+function printme(){
+cat $store 
+#IFS=$'\n'
+#for i in $(cat ~/.notes.db)
+#do
+  #clear=$(echo $i | awk '{print $1}')
+  #command="$clear"
+ #if [ -x "$(command -v $command)" ];then
+    #echo -e "\e[7;32mCOMMAND\e[0m" $i
+#else
+    #echo -e "\e[7;31m  NOTE \e[0m" $i
+#fi
+#done
+
+# for i in $(cat .notes.db| awk '{print $1}')
+# do
+# if [ -f "/bin/$i" ];then 
+#     IFS=$'\n'
+#     echo -e "\e[7;32mCOMMAND\e[0m" && cat ~/.notes.db 
+# else 
+#     echo hello
+# fi
+# done
+}
+function comments(){
+no_read="yes"
+if [ $no_read = "yes" ];then
+	read -p "Enter Comments : " comment
+	if [ -z "$comment" ];then
+		echo "Comment ignoring"
+	else
+	sed -i "$2s/$/ `echo -e '\033[30m'$comment'\033[0m'`/" $store	
+	fi
+fi
+}
+function addx(){
+if [ ! -z "$1" ];then
+    echo "$@" >> $store;
+else
+	nl -w1 -s ': ' $store
+    #help
+fi
+}
+# Add a tag to a note
+add_tag() {
+  local note_number=$2
+  local tag=$3
+  if [ -z $1 ] && [ -z $2 ];then
+	  return 1
+  fi
+  sed -i "${note_number}s/$/ ** $tag **/" $store
+}
+
+# Search for notes with a specific tag
+search_tags() {
+  local tag=$2
+  grep -i "** $tag" $store
+}
+# Add an event to the calendar
+add_event() {
+  local date=`date +%r`
+  local event=$2
+  echo "$date: $event" >> "$store"
+}
+
+# List the events in the calendar
+list_events() {
+  grep -E '^[0-9]{2}/[0-9]{2}/[0-9]{4}:' "$store"
+}
+sync_notes() {
+  local service=$1
+  case $service in
+    dropbox)
+      cp "$store" "$HOME/Dropbox/"
+      ;;
+    google_drive)
+      # Use the Google Drive API to upload the file
+      ;;
+  esac
+}
+#case $1 in
+	#-add|-a)add;;
+	#-copy|-c) copy;;
+	#-delete|-d) delete $@;;
+	#-b|-backup) cp -v $store $backup;exit;;
+	#-merge|-m) merge;;
+	#-help|-h)help;;
+	#-l|-print) nl -w1 -s ': ' $store;; 
+	#-e|-edit) num="$2";vim +$num $store;;
+	#-ei) sed -i "$2s@$3@${4:-+}@" $store || echo "check values";;
+	#--add|-a) echo "$@" >> $store;;
+	#-v|--version) echo " [!] Version is : 1.0";exit;;
+	#-s|--search) search $2$3$4$5$6;;
+	#-p|--print) sed -n -e $2p $store;;
+            #-lc)  sed -n -e $2p $store|clc;;
+            #-lf|-files) ls $dirnotes | fzf ;;
+	#-cm) comments $@;;
+            #-f|--file) addnotefile $@;;
+            #-sync) pidof -qx dropbox && cp $store $HOME/Dropbox/ || echo "Dropbox not running, Copy files only" && cp $store $HOME/Dropbox/;;
+##    	-*)  for i in $(echo -e "\e[7;32mNOTE\e[0m");do nl -w1 -s ': ' $store;done;;
+            #-*) printme;;
+	#*) addx $@;;
+#esac
+# TODO LIST
+# add HELP MENU
+# organize menus
+# delete unsesury functions
+case $1 in
+  # Add a note
+  -add|-a)
+    add
+    ;;
+
+  # Copy a note
+  -copy|-c)
+    copy
+    ;;
+
+  # Delete a note
+  -delete|-d)
+    delete "$@"
+    ;;
+
+  # Backup notes
+  -b|-backup)
+    cp -v "$store" "$backup"
+    exit
+    ;;
+
+  # Merge notes
+  -merge|-m)
+    merge
+    ;;
+
+  # Print help message
+  -help|-h)
+    help
+    ;;
+
+  -encrypt)
+  	encrypt_note $@;;
+
+ -decrypt)
+	decrypt_note $@;;
+  # Print notes with line numbers
+  -l|-print)
+    nl -w1 -s ': ' "$store"
+    ;;
+
+  # Edit a note
+  -e|-edit)
+    line_number="$2"
+    vim "+$line_number" "$store"
+    ;;
+
+  # In-place edit a note
+  -ei)
+    line_number="$2"
+    sed -i "${line_number}s@$3@${4:-+}@" "$store" || echo "check values"
+    ;;
+
+  # Append a note
+  --add|-a)
+    echo "$@" >> "$store"
+    ;;
+
+  # Print version
+  -v|--version)
+    echo " [!] Version is : 1.0"
+    exit
+    ;;
+
+  # Search notes
+  -s|--search)
+    search "$2$3$4$5$6"
+    ;;
+
+  # Print a specific line of the notes
+  -p|--print)
+    sed -n -e "$2p" "$store"
+    ;;
+  # Print a specific line of the notes and pass the output to clc
+  -lc)
+    sed -n -e "$2p" "$store" | clc
+    ;;
+   -tag)
+	   add_tag $@;;
+   -tas)
+	search_tags $@;;
+   -event)
+	   add_event $@;;
+   -evel)
+	   list_events;;
+   -email)
+	   send_email $@;;
+
+   -ta)
+	   add_checklist_item $@;;
+   -tm)
+	   mark_checklist_item_complete $@;;
+   -tl)
+	   list_checklist_items $@;;
+    -report) 
+	    generate_report $@;;
+
+  # List notes in a directory and pass the output to fzf
+  -lf|-files)
+    ls "$dirnotes" | fzf
+    ;;
+
+  # Add comments to a note
+  -cm)
+    comments "$@"
+    ;;
+
+  # Add a file as a note
+  -f|--file)
+    addnotefile "$@"
+    ;;
+
+  # Sync notes with Dropbox
+  -sync)
+sync_notes $@
+    ;;
+
+  # Any other option starting with -
+  -*)
+    printme
+    ;;
+
+  # No option or any other option
+  *)
+    addx "$@"
+    ;;
+esac

@@ -1,0 +1,7 @@
+#!/bin/env bash
+
+if [ "$(setxkbmap -query | grep layout | awk '{print $2}')" == "es" ];then
+	setxkbmap us
+else
+	setxkbmap es
+fi

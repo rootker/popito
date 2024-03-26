@@ -1,0 +1,228 @@
+#!/bin/bash
+
+
+function get_help(){
+cat << GET_HELP
+THIS HELP PAGE OF TOOL ANIME:
+        $(basename $0) get url.com/watch/animename/episode
+        $(basename $0) search name anime
+        $(basename $0) download url.com/watch/animename/episode
+        $(basename $0) help print this help
+END
+GET_HELP
+}
+function watch(){
+    if [ -z "$1" ];then
+        $0 get url.com/watch/animename/episode
+    else
+        getlink=$(curl -sS ${final_url:-$2} | grep -Eoi '<iframe [^>]+>'| grep -Eo '(http|https)://[^/*"]+*.*' | awk '{print $1}' | sed 's,",,')
+        title=$(curl -s ${final_url:-$2} | grep -Eo 'title[^>]+' | head -1 | sed -e 's,title",,;s,content=",,;s," /,,;s,  ,,')
+        echo "Opening ${title} in mpv"
+        mpv $getlink
+    fi
+}
+progressfilt ()
+{
+    local flag=false c count cr=$'\r' nl=$'\n'
+    while IFS='' read -d '' -rn 1 c
+    do
+        if $flag
+        then
+            printf '%s' "$c"
+        else
+            if [[ $c != $cr && $c != $nl ]]
+            then
+                count=0
+            else
+                ((count++))
+                if ((count > 1))
+                then
+                    flag=true
+                fi
+            fi
+        fi
+    done
+}
+function download(){
+if [ -z "$1" ];then
+    get_help
+else
+    echo "[*] Extract Data From Website"
+    getlink=$(curl -sS ${final_url:-$2} | grep -Eoi '<iframe [^>]+>'| grep -Eo '(http|https)://[^/*"]+*.*' | awk '{print $1}' | sed 's,",,')
+    echo "[!] Getting URL FOR $3"
+    echo $getlink
+    default="720p"
+    outurl="$(curl -sS $getlink | grep -Eoi 'htt[^>]+' | grep -P 'label="\K[^(&|")]+' | grep ${3:-720} | grep -Eo 'http[^"]+')"
+    echo "[*] Everything Done"
+    echo $outurl
+    #download_url=$(wget --progress=dot $outurl 2>&1 | grep --line-buffered "%" | sed -u -e "s,\.,,g" | awk '{printf("\b\b\b\b%4s", $2)}')
+    title=$(curl -sS ${2:-$final_url} | grep -Eo 'title[^=<]+' | head -1 | sed 's,title>,,'|sed 's,^ ,,')
+    $(wget -q --show-progress $outurl -O "${title}.mp4")
+fi
+}
+function search(){
+    PS3="--> "
+
+            #geturl=$(curl -s https://animeblkom.com/anime/tokyo-ghoul | grep -Eo 'href="/watch[^>]+' | sed -e 's,href=",,;s,",,' | while read line;do echo "https://animeblkom.com/$line";done | sed 's,[0-9]$*,,g')
+    if [ -z "$1" ];then
+        get_help
+        exit
+    else
+        echo "Searching ..."
+        sleep 0.5
+        echo "Searched for: $2 $3"
+        echo
+        search_url="https://animeblkom.com/search?query=$2+$3+$4"
+        #query=$(curl -s https://animeblkom.com/search?query=$2+$3+$4 | grep -Eo "<a [^>]+" | grep -Eo '/anime/[^"]+' | uniq | while read line;do echo "https://animeblkom.com$line";done)
+        #read -a results <<< $(curl -s https://animeblkom.com/search?query=$2+$3+$4 | grep -Eo "<a [^>]+" | grep -Eo '/anime/[^"]+' | uniq | while read line;do echo "https://animeblkom.com$line";done)
+        read -a results <<< $(curl -s https://animeblkom.com/search?query=$2+$3+$4 | grep -Eo "<a [^>]+" | grep -Eo '/anime/[^"]+' | uniq | xargs)
+        #for episode in $query;do
+        #    echo ep $episode
+        #done
+
+        #echo ${results[@]}
+        #exit
+
+        #while read result; do
+        #    echo res ${result##*/}
+        #done <<< $(curl -s https://animeblkom.com/search?query=$2+$3+$4 | grep -Eo "<a [^>]+" | grep -Eo '/anime/[^"]+' | uniq)
+        #exit
+
+        #:exit
+        declare -A letters
+        letters=( [1]=a [2]=b [3]=c [4]=d [5]=e [6]=f [7]=g [8]=h [9]=i [10]=P )
+        number=( [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 [10]=10 )
+        capital_letters=( [1]=A [2]=B [3]=C [4]=D [5]=E [6]=F [7]=G [8]=H [9]=I [10]=P )
+
+        #for l in ${!letters[*]}; do
+        #    echo ${letters[$l]}
+        #done
+        #exit
+
+        function get_results() {
+            #local -A letters=( [1]=a [2]=b [3]=c [4]=d [5]=e [6]=f [7]=g [8]=h [9]=i [0]=j )
+            result_count="${#results[@]}"
+
+            result_per_page=10
+            pages=$((result_count / result_per_page))
+
+            #for page in $(seq 1 $pages); do
+
+            while true; do
+                #for result_index in $(seq 0 $((result_count -1))); do
+                for page_result_index in $(seq 1 $result_per_page); do
+                    #current_index=$(( page_result_index * 2  ))
+                    if [[ $1 ]]; then
+                        local letter=${letters[$page_result_index]}
+                        local capital_letter=${capital_letters[$page_result_index]}
+                        local options="$page_result_index [\e[1;34m$letter\e[1;37m] [\e[1;31m$capital_letter\e[1;37m]"
+                    fi
+
+                    result_index=$((page * result_per_page + page_result_index - 1))
+                    #echo $((page * result_per_page))
+                    result="${results[result_index]##*/}"
+                    ((result_index <= result_count)) && echo -e "   ${options:-[\e[1;35m$page_result_index\e[0m]}\e[0m \e[1;37m$1 ${result//-/ }"
+                done
+                echo
+                echo -e '[\e[1;33mn\e[1;37m] next, [\e[1;33mp\e[1;37m] previous'
+                read -p $'command : ' choice
+
+                case $choice in
+                    n) (( page++  ));;
+                    p) (( page--  ));;
+                    *)
+                        if [[ $options ]]; then
+                            if [[ $choice =~ [1-10] ]]; then
+                                option=g
+                                for number_index in ${number[*]};do
+                                    [[ $choice == ${number[$number_index]} ]] && choosen_index=$number_index && break
+                                done
+                            elif [[ $choice =~ [A-Z] ]]; then
+                                option=d
+                                for letter_index in ${!capital_letters[*]}; do
+                                    [[ $choice == ${capital_letters[$letter_index]} ]] && choosen_index=$letter_index && break
+                                done
+                            else
+                                option=o
+                               for letter_index in ${!letters[*]}; do
+                                    [[ ${choice,} == ${letters[$letter_index]} ]] && choosen_index=$letter_index && break
+                                done
+                            fi
+                        fi
+
+                        current_index=$((page * result_per_page + ${choosen_index:-$choice} - 1))
+
+                        #[[ $options && $choice1 =~ [1-9] ]] && option=g
+                        #[[ $options && $choice =~ [A-Z] ]] && option=d || option=o
+
+                        choosen_result="${results[current_index]##*/}"
+        echo -e "Enter a \e[1;34mnumber\e[0m to watch the video in mpv"
+        echo -e "Enter a \e[1;31mCapital\e[0m to Download Video Using Wget"
+        echo -e "Enter a \e[1;32mletter\e[0m to open video on browser"
+                        break
+
+                    #echo $choosen_result
+                        #((result_count < index)) && echo Index out of range && exit
+                esac
+
+                echo page $page
+            done
+
+
+
+
+
+            #[[ $options ]] && read -n1 -p $'choose option\n' option
+            #read -p $'#)\n' index
+            #choosen_result="${results[index]##*/}"
+            #((result_count < index)) && echo Index out of range && exit
+        }
+
+    #curl -s https://animeblkom.com/anime/tokyo-ghoul | grep -Eo 'href="/watch[^>]+' | sed -e 's,href=",,;s,",,' | grep "tokyo" | while read line;do echo "https://animeblkom.com/$line";done
+    #exit
+
+        get_results
+        anime=$choosen_result
+
+       # echo "         Anime : $choosen_result"
+        read -a results <<< $(curl -s https://animeblkom.com/anime/$choosen_result | grep -Eo 'href="/watch[^>]+' | sed -e 's,href=",,;s,",,' | grep "$choosen_result" | xargs)
+        echo
+        get_results "\e[1;37mAnime : ${choosen_result//-/ } \e[1;31mEpisode\e[1;37m"
+        echo
+        final_url="${search_url%%/search*}/watch/$anime/$((current_index + 1))"
+                #echo ${search_url%%/search*}/watch/$anime/$index
+
+        #echo -e "watch x\ndownload d\nopen o"
+        #read -n1 choice
+        case $option in
+            g) watch $final_url;;
+            d) download $final_url;;
+            o) chromium $final_url;;
+        esac
+        exit
+
+        select anime in $episode
+        do
+            #get_episodes="$(curl -s https://animeblkom.com/anime/tokyo-ghoul | grep -Eo 'href="/watch[^>]+' | sed -e 's,href=",,;s,",,' | grep "tokyo" | while read line;do echo "https://animeblkom.com/$line";done)"
+            read episodes <<< $(curl -s https://animeblkom.com/anime/$result | grep -Eo 'href="/watch[^>]+' | sed -e 's,href=",,;s,",,' | grep "tokyo" | while read line;do echo "https://animeblkom.com/$line";done)
+
+            for episode in ${episodes[*]}; do
+                #echo ${episode##*/}
+                echo xxep $episode
+            done
+
+        #select episode in $get_episodes
+        #do
+        #    chromium $episode
+        #    exit
+        #done
+        done
+    fi
+    }
+case $1 in
+    watch) watch $@;;
+    search) search $@;;
+    download) download $@;;
+    help) get_help;;
+    *) get_help;;
+esac

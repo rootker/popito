@@ -1,0 +1,80 @@
+#!/bin/env bash
+enc_key="969BAB3AF40E0FA2DF1710FBA7821EA7854C9D20"
+PASSPHRASE="$(pass email/naichiroot@backblase.com)"
+b2_key="$(pass email/naichiroot-key@backblase.com)"
+b2_account="$(pass email/acc-id)"
+flags="--progress --sign-key $enc_key --encrypt-key $enc_key"
+bucket="kxqarifle"
+names=("hommex" "berdhy-new-home2")
+flagsend="b2://"$b2_account":"$b2_key"@$bucket"
+#duplicity $flags --allow-source-mismatch --full-if-older-than 30D /home/tsokkur/fil/ $flagsend
+err()
+{
+  echo >&2 "$(tput bold; tput setaf 1)[-] ERROR: ${*}$(tput sgr0)"
+
+  exit 1337
+}
+
+# simple warning message wrapper
+warn()
+{
+  echo >&2 "$(tput bold; tput setaf 1)[!] WARNING: ${*}$(tput sgr0)"
+}
+
+# simple echo wrapper
+msg()
+{
+  echo "$(tput bold; tput setaf 2)[+] ${*}$(tput sgr0)"
+}
+
+# check for root privilege
+check_priv()
+{
+  if [ "$(id -u)" -ne 0 ]; then
+    err "you must be root"
+  fi
+}
+check_internet()
+{
+  tool='curl'
+  tool_opts='-s --connect-timeout 8'
+
+  if ! $tool $tool_opts https://microsoft.com/ > /dev/null 2>&1; then
+    err "You don't have an Internet connection!"
+  fi
+
+  return $SUCCESS
+}
+check_internet
+case $1 in
+	-l|list) 
+		msg bucket : $bucket && duplicity $flags list $flagsend;; 
+
+	-v|verify) duplicity $flags verify -v4 --use-agent --compare-data $flagsend $2;; 
+
+	-b|backup)
+		# --asynchronous-upload
+		#  --exclude "${BACKUP_ROOT}/Downloads"
+		echo -e "--- BEGIN ---"
+		duplicity $flags --allow-source-mismatch --verbosity 4 --full-if-older-than 30D ${2:-/home/tsokkur/.local/kxqa} $flagsend
+		echo -e "[!] Cleaning "
+		duplicity $flags cleanup  --use-agent --force $flagsend
+		echo -e "[!] Deleting"
+		duplicity $flags  remove-all-but-n-full 12 --force $flagsend
+		;;
+	-r|restore) 
+		 duplicity $flags --use-agent --file-to-restore $2 $flagsend $3;;
+	-a|all)
+		duplicity $flags $flagsend $2;;
+	*)
+		exit;;
+esac
+# TODO
+# bocket support it least 6 character
+# --allow-source-mismatch --full-if-older-than 30D // backup
+#list-current-files # List files in b2
+#--file-to-restore # restore file
+#$ duplicity restore --file-to-restore [folder name from backup] b2://[keyID]:[application key]@[B2 bucket name] [restore path]
+#duplicity -t4D --file-to-restore apt/sources.list ftp://FtpUserID@ftp.domain.com/etc /home/user/sources.list.t4D
+#duplicity remove-older-than 1Y --force ftp://FtpUserID@ftp.domain.com/etc
+

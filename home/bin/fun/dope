@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if [ ! -f "$1" ];then
+	echo "No such file"
+	exit 1
+fi
+
+nosuf="${1%.*}"
+location="$nosuf""_dope.png"
+echo "$location"
+
+ffmpeg -i "$1" -vf hue=h=310:s=2.8:b=3,eq=contrast=4 "$location" -y >> /dev/null 2>&1 &&
+
+convert "$location"  \
+-set option:distort:viewport '%wx%h+0+0' \
+-colorspace CMYK -separate null: \
+\( -size 3x3 xc: \( +clone -negate \) \
++append \( +clone -negate \) -append \) \
+-virtual-pixel tile -filter gaussian \
+\( +clone -distort SRT 60 \) +swap \
+\( +clone -distort SRT 30 \) +swap \
+\( +clone -distort SRT 45 \) +swap \
+\( +clone -fill black -colorize 100 -distort SRT 0 \)  +swap +delete \
+-compose Overlay -layers composite \
+-set colorspace CMYK -combine -colorspace RGB \
+"$location" &&
+convert "$location"  \
+-virtual-pixel edge -channel M -fx "p[-5,-1]" \
+"$location" &&
+sxiv "$location"
+

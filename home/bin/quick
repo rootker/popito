@@ -1,0 +1,53 @@
+#!/bin/bash
+host=127.0.0.1
+
+select_all() {
+	{
+		echo "[artist]"
+		echo "[album]"
+		echo "[title]"
+		mpc -h $host list albumartist | sort | sed -e 's/^/artist: /' &
+		mpc -h $host list album | sort | sed -e 's/^/album: /' &
+		mpc -h $host list title | sort | sed -e 's/^/title: /'
+	} | dmenu "${dmenu_args[@]}"
+}
+
+select_album() {
+	mpc -h $host list album | sort -f | dmenu -p album "${dmenu_args[@]}"
+}
+
+select_artist() {
+	mpc -h $host list albumartist | sort -f | dmenu -p artist "${dmenu_args[@]}"
+}
+
+select_title() {
+	titles=`mpc -h $host listall -f %title% | sort -f`
+	echo $titles | uniq -c | dmenu -p title "${dmenu_args[@]}"
+}
+
+selection=$(select_all)
+
+case "$selection" in 
+	"[artist]")
+		match_type="albumartist"
+		target=$(select_artist)
+		;;
+	"[album]")
+		match_type="album"
+		target=$(select_album)
+		;;
+	"[title]")
+		match_type="title"
+		target=$(select_title)
+		;;
+	*)
+		match_type=$(echo $selection | cut -d " " -f1 | tr -d :)
+		target=$(echo $selection | cut -d " " -f2- )
+		;;
+esac
+
+if [ -n "$target" ]; then 
+	mpc -h $host clear
+	mpc -h $host searchadd "$match_type" "$target"
+	mpc -h $host play
+fi

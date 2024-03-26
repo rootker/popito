@@ -1,0 +1,120 @@
+#!/bin/bash
+# Todo app in bash
+user="$(whoami)"
+list="/home/$user/.todo"
+date="$(date '+%d/%m/%Y_%H:%M:%S')"
+notification="no"
+editor="nano"
+if [ ! -f "$list" ];then
+	echo " [!] Todo File Not Exists"
+	read -p " [*] Create New One [y\n] : " wh
+if [ "$wh" = "yes" ] || [ "$wh" = "y" ];then
+	touch "${list}"
+	exit
+else
+	echo " [!] Ok"
+	exit
+fi
+fi
+function help(){
+        echo "┌───────────────[ options ]"───────────── ─ ─
+        echo "│ -s            display the todo list"
+        echo "│ -a            add a todo item"
+        echo "│ -e            open todo on editor"
+        echo "│ -d            <number> delete a todo item"
+        echo "│ -r            merge todo file"
+	echo "│ -c. --copy    copy mode for todo using fzf"
+        echo "│ -h, --help    display this screen"
+        echo "└──────────────────────────────────────── ─ ─"
+
+}
+function show(){
+		echo ""
+		echo "     ██                 ██"
+		echo "    ░██                ░██"
+		echo "   ██████  ██████   ██████  ██████"
+		echo "  ░░░██  ░██░░░░██░██░░░██░██   ░██"
+		echo "    ░██  ░██   ░██░██  ░██░██   ░██"
+		echo "    ░░██ ░░██████ ░░██████░░██████"
+		echo "     ░░   ░░░░░░   ░░░░░░  ░░░░░░"
+		echo ""
+		echo "     _ __ __________________ __ _"
+		echo ""
+                #cat $list | tr '|' '\n'
+		if [ "$2" = "n" ];then
+		nl -w1 -s ': ' $list
+		else
+		cat $list
+		fi	
+                #sleep 4
+
+}
+function add(){
+	read -p "Name : " todoname
+	read -p "Desc : " tododesc
+	read -p "alert (y/n): " alert
+	if [ -z "${tododesc}" ];then
+		echo "Ignoring Desc "
+	else
+		details="| \e[1;33mDesc\e[0m : ${tododesc}"
+	fi
+	if [ $alert == "y" ];then
+		read -p "Alert time ($(date +%l:%M:%p) ): " time
+		echo "notify-send -a $todoname -i /usr/share/icons/Adwaita/96x96/emotes/face-angry-symbolic.symbolic.png $tododesc" | at "${time}"	
+		Timer="| \e[1;31mAt time\e[0m : "${time}""
+	fi
+	echo -e "\e[1;34mName\e[0m : $todoname $details $Timer | \e[1;35mDate\e[0m : $date" >> $list
+}
+function delete(){
+	if [ -z "$(sed -n $2p ~/.todo)" ] || [ -z $2 ];then
+		echo "[!] line $2 doesnt exits"
+		exit
+	else 
+		sed ${2}d -i $list
+                echo " [!] line $2 Deleted."
+                exit
+	fi
+}
+edittodo(){
+	read -p " [!] Edit Name [y/n] : " yn
+	if [ $yn = "y" ];then
+	read -p " [*] Enter New Name : " todoname
+	sed '0, /|/ s/old/new' 
+	fi
+	read -p " [!] Edit Desc [y/n] : " yn2
+	if [ "$yn2" = "y" ];then
+	read -p " [!] Enter New Desc : " tododesc
+	fi
+}
+copy(){
+        if ! hash fzf 2>/dev/null;then
+        echo " You Need To install fzf"
+        exit
+else
+        cat $list|fzf|xclip -selection clipboard && echo "[+] COPY SUCCEFUL "
+fi
+}
+donex(){
+	BLUE='\e[9;31m'
+	RED='\e[0;31m'
+	CLEAR='\e[0;0m'
+
+	if [ -z $2 ];then
+	echo " $0 done linenumber"
+	else
+	 sed -i "$2s/\x1B\[[0-9;]\{1,\}[A-Za-z]//g" $list || return 1
+	sed -i -e "$2s/^/`echo -e $BLUE`/" -e "$2s/$/`echo -e $CLEAR`/" $list
+	fi
+}
+case $1 in
+	add | -a) add;;
+	done) donex $@;;
+	#xm | -ed) edittodo;;
+	edit | -e) $editor $list;;
+	del | -d) delete $@;;
+	ls | -s) show $@;;
+	merge|-m) rm $list;;
+	copy|-c) copy;;
+	help) help;;
+	*) help;;
+esac

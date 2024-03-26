@@ -1,0 +1,40 @@
+#!/bin/env bash
+rand=$(shuf -i 0-11 | head -1)
+favor(){
+#  https://ia904706.us.archive.org/13/items/010_20221110/023.mp3
+URL="https://ia904706.us.archive.org/13/items/010_20221110/"
+FAVOR=(0 023)
+_AR=${FAVOR[$2]}
+if [ "${FAVOR[$2]}" = "${AR}" ];then
+       echo "DOESTNT EXIST"
+       return 1
+else
+	mpv --volume=70 --loop --no-video $URL${FAVOR[$2]}.mp3 --input-ipc-server=/tmp/qur_$rand
+fi	
+}
+nasser(){
+	getONE=(001 002 003 004 005 006 007 008 009 010 011 012 013 014 015 016 017 018 019 020 021 022 023 024 025 026 027 028 029 030 031 032 033 034 035 036 037 038 039 040 041 042 043 044 045 046 047 048 049 050 051 052 053 054 055 056 057 058 059 060 061 062 063 064 065 066 067 068 069 070 071 072 073 074 075 076 077 078 079 080 081 082 083 084 085 086 087 088 089 090 091 092 093 094 095 096 097 098 099 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114)
+	play=${getONE[$rand]}
+	mpv --volume=70 --no-video https://server6.mp3quran.net/download/qtm/$play.mp3 --input-ipc-server=/tmp/qur_$play
+}
+abdullah(){
+getONE=(010 019 029 049 078 088 107 100 087 073 032 023)
+play=${getONE[$rand]};
+#nohup mpv --no-video https://ia904706.us.archive.org/13/items/010_20221110/$play.mp3 > /tmp/mpv_a.log 2>&1 & 
+mpv --volume=70 --no-video https://ia904706.us.archive.org/13/items/010_20221110/$play.mp3 --input-ipc-server=/tmp/qur
+}
+#echo $rand
+#mpv --no-video "https://fra1.digitaloceanspaces.com/media.midad.com/resources/ar/recitations/52369/464106/$rand.mp3?response-content-disposition=attachment&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=BKPUJK7ZZK5A2DAO7JVR%2F20221210%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20221210T035530Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604800&X-Amz-Signature=187f2bbfa699122b94569b195b17ea2a07dc2c9e46254c1da543466f63188695"
+
+#mpv --no-video https://server14.mp3quran.net/mousa/Rewayat-Hafs-A-n-Assem/0$1.mp3
+while getopts :rafnp:d: arg; do
+    case "$arg" in
+        a) abdullah;; 
+	f) favor $@;;
+	n) nasser;;
+	s) search $@;;
+	p) preview=1;; 
+        ?) echo "Unknown option $OPTARG";;
+    esac
+done
+shift $((OPTIND - 1))

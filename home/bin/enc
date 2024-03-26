@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+handle_file()
+{
+	if [ "$unencrypt" = 1 ]; then
+		openssl aes-256-cbc -d -a -iter 100000 -in "$1" -out "${1%.enc}"
+		rm "$f"
+	else
+		openssl aes-256-cbc -a -iter 100000 -in "$1" -out "${1}.enc"
+		rm -P "$f"
+	fi
+}
+
+unencrypt=0
+if [ "$1" = "-u" ]; then
+	unencrypt=1
+	shift
+fi
+for f in "$@"; do
+	handle_file "$f"
+done

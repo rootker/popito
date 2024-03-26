@@ -1,0 +1,19 @@
+#!/bin/bash
+# source : https://blog.abhi.host/blog/2011/02/16/delete-currently-playing-song-in-mpd/
+# Edit by tsokkurv2
+read -p "sure : " remove 
+if [[ $remove = "y" ]];then
+        song_to_remove=$(mpc | head -n 1)
+        playlist_pos=$(mpc -f %position% | head -n 1)
+        #Delete the song
+	#folder="$HOME/.local/music"
+	folder="$HOME/MusicX"
+	song=$(mpc -f %file% | head -1 | sed 's/mp3$//')
+	rm "$folder/$song"*
+#        rm "$(mpc -f %file% | head -n 1 | sed 's/^/\/home\/tsokkur\/.local\/music\//')"
+        #Remove the song from playlist
+        mpc del $playlist_pos
+	mpc play
+        #Write to log file
+        echo "[`date`] -> --$song_to_remove-- is now deleted..." >> /tmp/.mpdremove.log
+fi

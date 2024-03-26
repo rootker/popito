@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+# Author:      Twily                                          2017
+# Description: Used for indexing and searching through the system.
+# Requires:    sudo, find, sed
+# Usage:       $ sh ./indexer 'tag1|tag2' tag3 tag4 ...
+#              (Use --index to rebuild the database.)
+#
+# Installing indexer as cron job (requires root):
+#     chmod +x scripts/indexer
+#     sudo cp scripts/indexer /root/
+#     sudo vim /root/indexer
+#         :22,s/sudo //g
+#         :wq
+#     sudo crontab -e
+#         0 * * * * sh /root/indexer --index
+#         :wq
+#
+# Add command to your zsh/bashrc:
+#     chmod +x scripts/indexer (If you skipped the cron job)
+#     iser() { $HOME/scripts/indexer $@ }
+#
+
+TMP="/tmp/"
+IDXDIR=$TMP"indexeddirs.log"
+IDXFIL=$TMP"indexedfiles.log"
+IDXSRC=$TMP"indexedsearch.log"
+
+index() {
+    sudo rm -f $IDXFIL
+    sudo rm -f $IDXDIR
+    sudo find / -type f >> $IDXFIL
+    sudo find / -type d >> $IDXDIR
+
+    echo "System indexing completed."
+}
+
+multi() {
+    if [ $# -gt 1 ]; then
+        shift
+        for var in "$@"; do
+            str="$str grep -i $var |"
+        done
+    fi
+    str="$str grep ''"
+    eval $str
+}
+search() {
+    rm -f $IDXSRC
+    echo -e "Last indexed $LMOD minutes ago. (Re-index with $ iser --index)\n"
+    echo -e "Search tags: \"$@\"\n"
+
+    echo -e "Last indexed $LMOD minutes ago. (Re-index with $ iser --index)\n" >> $IDXSRC
+    echo -e "Search tags: \"$@\"\n" >> $IDXSRC
+    echo -e "%%%___PLACEHOLDER___DIR___FILE___COUNT___%%%" >> $IDXSRC
+
+    echo -e "\nvvv ======================= DIRECTORIES ======================= vvv\n" >> $IDXSRC
+    cat $IDXDIR | grep -iE $1 | multi $@ | sort >> $IDXSRC
+    echo -e "\n^^^ ======================= DIRECTORIES ======================= ^^^\n" >> $IDXSRC
+
+    NDIR=$(( $(wc -l < $IDXSRC) - 11 ))
+    echo -e "%%%___PLACEHOLDER___DIR___FILE___COUNT___%%%" >> $IDXSRC
+
+    echo -e "\nvvv ========================== FILES ========================== vvv\n" >> $IDXSRC
+    cat $IDXFIL | grep -iE $1 | multi $@ | sort >> $IDXSRC
+    echo -e "\n^^^ ========================== FILES ========================== ^^^\n" >> $IDXSRC
+
+    NFIL=$(( $(wc -l < $IDXSRC) - $NDIR - 18 ))
+    echo -e "%%%___PLACEHOLDER___DIR___FILE___COUNT___%%%" >> $IDXSRC
+    echo -e "\nSearch tags: \"$@\"\n" >> $IDXSRC
+
+    sed -i "s/%%%___PLACEHOLDER___DIR___FILE___COUNT___%%%/Directories ($NDIR), Files ($NFIL)/g" $IDXSRC
+
+    less -R $IDXSRC
+}
+
+if [ "$1" == "--index" ]; then index && exit 0; fi
+if [ ! -f "$IDXDIR" ] || [ ! -f "$IDXFIL" ]; then index; fi
+
+LMOD=$(( ($(date +%s) - $(date +%s -r $IDXFIL))/60 ))
+
+search $@
+
+exit 0

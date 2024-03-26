@@ -1,0 +1,87 @@
+linkhandler https://www.youtube.com/watch?v=yyUHQIec83I
+ssh -o PasswordAuthentication yes yourserverip [30mlogin to ssh with password[0m
+tig to see logs of git
+sudo -e -v rfkill list
+touch -r change time
+gpg --symmetric --cipher-algo AES256 file.txt
+vnstat networks stats
+duf dust df rg
+aft-mtp-cli
+https://github.com/mileszs/ack.vim
+(nice/renice) -n -10 # to speed process
++ 1, 5, and 8.
++ dumpe2fs /dev/sdb1
+dumpe2fs /dev/sdb1 | less && tune2fs -L mylabel /dev/sdb1
+cat /proc/cmdline # kernel parameter
+ssh ds
+journalctl --since "20 min ago" [30mshow logs in last 20 minute[0m
+journalctl _PID=*PID*
+journalctl -k
+journalctl -p err..alert
+journalctl --verify
+systemctl kill --kill-who=main --signal=SIGUSR2 systemd-journald.service
+gpasswd -
+/etc/systemd/logind.conf [30msystemd-logind[0m
+sudo iwlist freq // check for freq
+journalctl -b --user-unit pulseaudio -g "Battery Level" -o cat
+xsetroot -solid red
+D2:C8:6C:08:C1:1D airpords
+sudo iptables -A INPUT -i wlan0 -p tcp --dport 22 -m state --state ESTABLISHED -j ACCEPT
+iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0/24
+iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0/24 --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+lsof && netstat -tap
+sysctl -l -w
+fuse-zip -r archive mountpoint
+ln -sfn
+mktemp -d -q -p /home/tsokkur/
+sendit.ma colisade.ma expresscoursier.ma
+watch -n1 ps -wfC backup-b2 | cat
+cat << EOF > message.txt
+gpg --armor --export mohamed | mail -s "GPG KEY" stenani12@gmail.com
+install -Dm644
+wg-quick up wg0
+--assume-installed ignore package
+Bernad Herrman - i still cant sleep
+gpg --list-secret-keys --keyid-format=long
+git rebase -i HEAD~10
+git branch -m smoke rifle
+^curl https://api.hetrixtools.com/v2/82d9f8c500ea5e48ac1c49a18a06eca6/blacklist-check/ipv4/197.144.41.220/^
+^/bin/dig +short myip.opendns.com @resolver1.opendns.com^
+^docker-compose^
+^gpg --export-secret-keys --armor -o dw.pgp -r 969BAB3AF40E0FA2DF1710FBA7821EA7854C9D20^
+declare -f any
+^exp^lab  # replace word in history
+echo 111 222 333 !#:1
+!:s/dwx/foo replace word [30msg will replace all word[0m
+!:t-end !:s-head !:r-Extensions !:e-get_Extensions
+cpupower frequency-set -g performance
+if func 1; then echo true; else echo false; fi
+seq 10 | paste - - -
+find /usr/sbin -type f -print0 | wc --files0-from=-
+for_window [title="Tasks.*"] floating enable; resize shrink width 10000px; resize grow width 400px; resize shrink height 10000px; resize grow height 800px;
+declare -x make ex
+set -u ..check if variable xits return true
+sudo cat /dev/input/mice | od -tx1
+unset -f
+tail -f /proc/<pid>/fd/1
+typeset +r TMOUT
+8:05
+apachectl configtest
+the fall of the house of usher book
+journalctl -b 0 -o verbose _UID=1000 -r -p err
+sudo dmesg -l err
+strace -e write ls -l /tmp
+inotifywait -m **DIRNAME** -e create -e delete -e modify
+tar (t list) (x extract) (C dirname) (c create) (z for gzip) (j for bzip2) (r append) (--delete delete file in tar) **TAR** **DIR**
+cmp
+sudo fuser -Mk hsmp
+sudo usermod -g change default group for user
+printenv
+date --set=05:33
+sg www-data ls
+sudo sh -c 'echo "./core" > /proc/sys/kernel/core_pattern'
+dkwodkw ** command **
+echo ds2.py
+echo ds2.py| entr python3 ds2.py ** command **
+sudo tcpdump -i wlan0 -f 'tcp port 80' -A -c 100 -w /tmp/wrap.pcap
+date +%H:%M

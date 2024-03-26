@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# Specify the file name for storing the file checksums
+chksumfile=.checksums.txt
+
+# Choice of tool for generating and verifying checksums
+hashgen=sha256sum
+
+function show_help {
+    cat <<-END
+Usage: ${0##*/} [OPTIONS] [FILE]
+Detect changes to files and directory contents using $hashgen checksums.
+Unlike Git and similar, this program does not store file version history.
+
+On the first run, the program stores the directory contents and the file
+cryptographic checksums in a '$chksumfile' file in the current directory. During
+subsequent runs, the directory contents and files are compared to the these
+stored values.
+
+Options:
+  -h, --help       show this message
+  -                list all files and their checksums to stdout
+  -a, --add FILE   update the stored checksum value of FILE
+  -r, --reset      reset the values $chksumfile to the current state, which is
+                   identical to calling '--add FILE' to all files
+
+This program exits with return status 0 if no changes are found to the stored
+state, and 1 if changes are detected.
+
+Author: Anders Damsgaard anders@adamsgaard.dk, License: GPLv3+
+END
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_help
+    exit 0
+fi
+
+# Return checksums for all files in all subdirectories
+generate_checksums() {
+    find . -type f              `# search files in all subdirectories` \
+        ! -name "$chksumfile"   `# ignore the checksumfile itself` \
+        ! -name "${0##*/}"      `# ignore this file` \
+        ! -name ".*.swp"        `# ignore editor swap files` \
+        -exec "$hashgen" '{}' + `# run hash command on every found file`
+}
+
+check_if_file_exists() {
+    if [ ! -f "$1" ]; then
+        (<&2 echo "Error: file '$1' was not found")
+        exit 2
+    fi
+}
+
+update_checksum() {
+    file=${1//\//\\\/}   # escape forward slashes
+    file=${file//\./\\.} # escape periods
+    file=${file// /\\ }  # escape spaces
+    # sed -i '' "s/^.* \*\.$file/$($hashgen $1) *.\/$file/" "$2"
+    grep "$file" "$2"
+    sed -i '' "s/.*\ $file/asdf/" "$2"
+
+}
+
+if [ ! -f "$chksumfile" ] || [ "$1" = "-r" ] || [ "$1" = "--reset" ]; then
+    # (Over-)write checksum file
+    generate_checksums > "$chksumfile"
+    echo "Checksums stored in $chksumfile"
+
+elif [ "$1" = "-a" ] || [ "$1" = "--add" ]; then
+    for file in "${@:2}"; do
+        check_if_file_exists "$file"
+    done
+    # Update checksums for all specified files
+    for file in "${@:2}"; do
+        update_checksum "$file" "$chksumfile"
+    done
+
+elif [ "$1" = "-" ]; then
+    # Print checksums and file paths to stdout
+    generate_checksums
+
+else
+    # Compare current checksums against stored values
+    generate_checksums \
+        | diff "$chksumfile" -  `# compare stored checksums with current vals` \
+        | sed 's/>/new: /'      `# replace > with new:` \
+        | sed 's/</rem: /'      `# replace < with rem:` \
+        | sed 's/\*\.\///'      `# simplify file path`
+        #| awk '{ print $1 $3 }' `# hide checksum in second column` \
+
+    # Report if the diff command returned with status 0
+    if [ ${PIPESTATUS[1]} -eq 0 ]; then
+        echo "No file changes detected"
+    else
+        # Return exit status 1 if something changed
+        exit 1
+    fi
+fi

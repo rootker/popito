@@ -1,0 +1,38 @@
+#!/bin/sh
+# clp - Cross-platform (cl)ipboard (p)aste
+#
+#   clp   - writes clipboard's contents to stdout
+#
+#   clp | <command>    - pastes contents and pipes it to another process
+#
+#   clp > <file>      - paste contents to a file
+#
+# Examples:
+#
+#   # Pipe to another process
+#   clp | grep foo
+#
+#   # Paste to a file
+#   clp > file.txt
+os=$(uname -s | tr '[:upper:]' '[:lower:]')
+case "$os" in
+  linux*)
+    if command -v xclip 1>/dev/null 2>&1; then
+      xclip -out -selection clipboard
+    elif command -v xsel 1>/dev/null 2>&1; then
+      xsel --clipboard --output
+    else
+      printf "clc: xclip/xsel not installed\n"
+    fi
+    ;;
+  darwin*)
+    pbpaste
+    ;;
+  msys*|cygwin*|mingw*|nt|win*)
+    cat /dev/clipboard
+    ;;
+  *)
+    printf "Operating system %s is unknown.\n" "$os"
+    return 1
+    ;;
+esac

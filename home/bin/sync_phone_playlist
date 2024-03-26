@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+if ! command -v adb-sync &>/dev/null; then
+  echo "adb-sync not installed." >&2
+  exit 1
+fi
+if ! command -v adb &>/dev/null; then
+  echo "adb not installed." >&2
+  exit 1
+fi
+
+die() {
+  echo "$1" >&2
+  exit 1
+}
+
+process_file() {
+  echo "Processing $1"
+  tr '\r' '\n' < "$1" | sed 's:^/Volumes.*Music/:../Music/:' > "$tempdir"/"${1##*/}"
+}
+clean_up() {
+  rm -r "$tempdir"
+  exit 0
+}
+
+PHONE_DIR="/storage/5D6D-E047/Playlists"
+[ ! -z "$(adb devices | grep device$)" ] || die "Phone not connected."
+
+[ $# -ge 1 ] || die "Need something to act on."
+
+tempdir="$(mktemp -d)"
+trap clean_up INT KILL TERM QUIT
+for i in "$@"; do
+  if [ -d "$i" ]; then
+    while read -r f; do
+      process_file "$f"
+    done < <(find "$i" -name "*.m3u" -type f -maxdepth 1)
+  elif [ -f "$i" ]; then
+    if [[ "$i" == *.m3u ]]; then
+      process_file "$i"
+    else
+      echo "Could not process $i"
+    fi
+  fi
+done
+
+read -rp "Sync now?" -n 1 -s conf
+case "$conf" in
+  Y|y)
+    adb-sync "$tempdir/" "$PHONE_DIR"
+    ;;
+esac
+
+clean_up

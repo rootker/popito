@@ -1,0 +1,7 @@
+#!/bin/sh
+# source : https://git.alex.balgavy.eu/dotfiles/files.html
+if ! command -v mpv &>/dev/null; then
+  echo "mpv not installed." >&2
+  exit 1
+fi
+mpv --loop --volume=50 "https://rainymood.com/audio1112/0.m4a" --input-ipc-server=/tmp/rain

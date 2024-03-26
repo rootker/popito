@@ -1,0 +1,135 @@
+#!/bin/sh
+# requirements: dmenu(1), xdotool(1) (for -t, -n and -u options)
+
+pass_dir="$HOME/.password-store"
+
+show_help()
+{
+	echo "usage: ${0##*/} [OPTIONS] [QUERY]"
+	echo "shows all passwords from pass(1) and allows interactive selection"
+	echo "via dmenu(1). By default, the password is copied to the X clipboard."
+	echo
+	echo "OPTIONS are one or more of the following:"
+	echo "   -h      show this message"
+	echo "   -t      type out the password instead of copying to clipboard"
+	echo "   -n      type out newline character after password type out (-t)"
+	echo "   -u VAL  type out VAL before copying password or typing it out"
+	echo "   --      do not consider any following args as options"
+	echo
+	echo "EXAMPLES:"
+	echo "Open interactive menu with all passwords:"
+	echo "	${0##*/}"
+	echo
+	echo "Type out password matching 'newyorktimes':"
+	echo "	${0##*/} newyorktimes"
+	echo
+	echo "Type out username, tab character, and password selected from menu,"
+	echo "and hit return:"
+	echo "	${0##*/} -n -t -u \"myusername\\t\""
+}
+
+die()
+{
+	printf '%s: error: %s\n' "${0##*/}" "$1" >&2
+	exit 1
+}
+
+get_password_files()
+{
+	find "$pass_dir" -type f -iname "*.gpg"
+	printf 'primary\nclipboard\n'
+}
+
+strip_root_dir()
+{
+	sed "s,${pass_dir%/}/,,"
+}
+
+match_password_file()
+{
+	_passfiles="$(get_password_files | strip_root_dir | sed 's/\.gpg$//')"
+	if [ "$#" -gt 0 ]; then
+		_passfile="$(printf '%s' "$_passfiles" | grep -i "$@")"
+		if [ "$(printf '%s\n' "$_passfile" | wc -l)" -eq 0 ]; then
+			die "no password matches '$@'"
+		elif [ "$(printf '%s\n' "$_passfile" | wc -l)" -gt 1 ]; then
+			die "more than one password matches '$@': $_passfile"
+		fi
+	else
+		_passfile="$(printf '%s\n' "$_passfiles" | dmenu -i)"
+		if [ $? -ne 0 ]; then
+			die 'aborted by user'
+		fi
+	fi	
+	printf '%s\n' "$_passfile"
+}
+
+retrieve_password()
+{
+	if [ "$1" = "clipboard" ] || [ "$1" = "primary" ]; then
+		xdotool type "$(xclip -o -selection "$1")"
+		exit 0
+	fi
+
+	_passfile="${pass_dir}/${1}.gpg"
+	if [ -n "$prefix" ]; then
+		xdotool type "$prefix"
+	fi
+	case "${_passfile}" in
+		*/2fa-*)
+			f="$(printf '%s' "${_passfile}" | sed "s,$pass_dir/,,;s,.gpg,,")"
+			p="$(pass otp "$f")";;
+		*)
+			p="$(gpg2 -q -d "${_passfile}")";;
+	esac
+
+	if [ "$typeout" = 1 ]; then
+		printf '%s' "$p" | \
+			{ IFS= read -r pass; printf %s "$pass"; } | \
+			xdotool type --clearmodifiers --file -
+		if [ "$newline" = 1 ]; then
+			xdotool key Return
+		fi
+	else
+		printf '%s' "$p" | xclip
+	fi
+}
+
+typeout=0
+newline=0
+prefix=""
+while :; do
+	case "$1" in
+		-h)
+			show_help
+			exit 0
+			;;
+		-t)
+			typeout=1
+			;;
+		-n)
+			newline=1
+			;;
+		-u)
+			prefix="$2"
+			shift
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'unknown option specified'
+			;;
+		*)  # No more options
+			break
+	esac
+	shift
+done
+
+pass="$(match_password_file "$@")"
+if [ -n "$pass" ]; then
+	retrieve_password "$pass"
+else
+	exit 1
+fi

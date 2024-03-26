@@ -1,0 +1,248 @@
+#!/bin/bash
+# SIMPLE BACKUP TOOL USING RSYNC
+
+# Set strict mode to exit on error and unset variables
+set -euo pipefail
+
+# Set auto_backup to "no" by default
+auto_backup="no"
+
+# Set the backup type to "git" by default
+backup_type="git"
+
+git_directory="$HOME/personal/git/rifle"
+
+PLAIN=0
+# Set the directories for config files, home files, and etc files
+config_files="/home/$USER/.config/"
+home_files="/home/$USER/"
+etc_files="/etc/"
+
+# Set the backup directory
+backup_dir="/home/$USER/Dropbox/linux_suite/"
+
+# Set the list of config files to be backed up
+config_file_list="
+newsboat surfraw dunst i3
+alacritty mpv neomutt polybar rclone
+rbw ranger ncmpcpp mpd termite mpd nnn
+rofi sxiv tmux systemd git picom.conf
+"
+
+# Set the list of home files to be backed up
+home_file_list="
+.zsh .zshrc .ssh .msmtprc
+.conkyrc .pockyt .gitconfig
+.gdbinit .msmtprc .mbsyncrc
+.offlineimaprc .muttrc .mbsyncrc .vim-bookmarks
+.mutt .bashrc .vimrc .notes.db
+.todo .irssi .local/bin .vim
+"
+
+# Set the list of etc files to be backed up
+etc_file_list="
+/etc/profile /etc/default/grub /etc/pacman.conf /etc/mkinitcpio.conf /etc/sudoers /etc/lightdm /etc/rkhunter.conf
+/etc/environment /etc/zsh /etc/autofs
+/etc/systemd/sleep.conf
+/etc/systemd/system/resume@.service /etc/systemd/system/suspend@.service
+"
+# ---- END ------
+# dependis
+# Make sure rsync is installed
+if ! command -v rsync 2>&1 >/dev/null; then
+    echo "ERROR: You need rsync to use this script." >&2
+    exit 1
+fi
+# Make sure Git is installed if the backup type is set to "git"
+if [[ "$backup_type" == "git" ]] && ! command -v git 2>&1 >/dev/null; then
+    echo "ERROR: You need Git to use this script with the 'git' backup type." >&2
+    exit 1
+fi
+# if ! command -v notify-send 2&>/dev/null;then echo "Notification will not work -> u need libnotify";exit;fi
+# if ! command -v dropbox 2&>/dev/null;then echo "[!] U DONT HAVE DROPBOX";fi
+# SPINNER="-\|/"
+function lop() {
+    #SPINNER=".oO@*"
+    #SPINNER="▉▊▋▌▍▎▏▎▍▌▋▊▉"
+    SPINNER="←↖↑↗→↘↓↙"
+    #SPINNER="▁▂▃▄▅▆▇█▇▆▅▄▃▁"
+    #    SPINNER="▖▘▝▗"
+    #SPINNER="┤┘┴└├┌┬┐"
+    #SPINNER="◢◣◤◥"
+    #SPINNER="◰◳◲◱"
+    #SPINNER="◴◷◶◵"
+    #SPINNER="◐◓◑◒"
+    VERBOSE=3
+    I=""
+    I=$((I + 1))
+    for BL in $2; do
+        I=$((I + 1))
+        if [ $VERBOSE -ge 0 ]; then
+            if test -z "$PLAIN"; then
+                progress "$I" "$COUNT"
+            fi
+        fi
+    done
+}
+
+progress() {
+
+    # Bar
+    x=$(($1 % ${#SPINNER} + 1))
+    BAR=$(echo $SPINNER | awk "{ print substr(\$0, ${x}, 1) }")
+    if test -z "$PLAIN"; then
+        printf "\r "
+    fi
+
+    # BAR as printf arg so that backslash will be litteraly interpreted
+    printf "[ %s %3s%% ] checking... %4s / $2\n" "$BAR" $(($1 * 100 / $2)) "$1"
+}
+info() {
+    if [ $VERBOSE -ge "$1" ]; then
+        echo "$2"
+    fi
+}
+error() {
+    echo "ERROR: $1" >&2
+    exit 2
+}
+function backup() {
+
+    # The --delete flag; will delete old files and replace with new files carefull
+    #if [ ! -d $backup_dir -a ! -d $backup_dir/linux -a ! -d $backup_dir/linux/home/ -a ! -d $backup_dir/linux/config/ ];then
+    #echo "[!] Trying to create directory"
+    #mkdir -p $backupdir/linux/home/ $backupdir/linux/config/ $backupdir/linux/etc/ 2&>/dev/null && echo "[+] Directory is created succefull"
+    #fi
+    backupdir="/tmp/"
+    case $2 in
+    dr | dr)
+        if [ ! -d $backupdir ]; then
+            echo "[!] $backupdir is missing"
+            exit 1
+        fi
+        #rsync_args="-aruAX --delete --exclude-from="$HOME/.list" --ignore-missing-args --ignore-existing -v"
+        #rsync_args="-airuAX --include .zsh --delete --exclude-from="$HOME/.list" --ignore-missing-args"
+        echo $home_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $home_files{} $git_directory/hm/ 2>/tmp/hm-DR_ERROR || echo "ERROR HOME : /tmp/hm_ERROR" $?
+        echo $config_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $config_files{} $git_directory/hc/ 2>/tmp/hc-DR_ERROR || echo "ERROR CONFIG : /tmp/hc_ERROR" $?
+        echo $etc_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $etc_files{} $git_directory/et/ 2>/tmp/etc-DR_ERROR || echo "ERROR IN ETC : /tmp/etc_ERROR" $?
+        ;;
+    -g | git)
+        rsync_args="-airuAX --include .zsh --delete --exclude-from="$HOME/.list" --ignore-missing-args"
+
+        COUNT=$(($(echo "$home_file_list" | wc -l))) && lop $home_file_list && echo $home_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $home_files{} $git_directory/hm/ 2>/tmp/hm_ERROR || echo "ERROR HOME : /tmp/hm_ERROR" $?
+
+        COUNT=$(($(echo "$config_file_list" | wc -l))) && lop $config_file_list && echo $config_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $config_files{} $git_directory/hc/ 2>/tmp/hc_ERROR || echo "ERROR CONFIG : /tmp/hc_ERROR" $?
+
+        COUNT=$(($(echo "$etc_file_list" | wc -l))) && lop $etc_file_list && echo $etc_file_list | tr ' ' '\n' | xargs -I {} rsync $rsync_args $etc_files{} $git_directory/et/ 2>/tmp/etc_ERROR || echo "ERROR IN ETC : /tmp/etc_ERROR" $?
+        ;;
+    *)
+        echo "NOTHING" && return 1
+        ;;
+    esac
+
+    if [ $auto_backup = "yes" ]; then
+        # Check if the backup type is "git"
+        if [ $(echo $?) != "0" ]; then
+            echo "There in error"
+        fi
+        if [ $backup_type != "git" ]; then
+            systemctl start --user dropbox
+        fi
+    fi
+    if [ $? = "0" ]; then
+        printf 'Finished!\n'
+        notify-send --app-name=backup "BACKUP FINISHED !!!" -i /usr/share/icons/Arc/apps/64/goa-panel.png
+    else
+        echo "ERROR"
+    fi
+}
+function sync() {
+    echo "*** ___ ***"
+    echo "[!] begging of backup"
+    if [[ "$backup_type" == "git" ]]; then
+        # Set the Git directory
+        git_directory="/home/$USER/personal/git/rifle"
+        # Check if the Git directory exists
+        if [ -d "$git_directory" ]; then
+            # Change to the Git directory
+            cd "$git_directory"
+            if ! git diff-index --quiet HEAD --; then
+                git add . || echo "Nothing new"
+                echo "----------------------------"
+                # Commit the changes with a timestamp
+                git commit -m "Automated backup $(date)"
+                pidof -qx ssh-agent && git push -u origin smoke || echo "ssh-agent not running"
+            fi
+        fi
+    fi
+}
+function restore() {
+    if [ ! -d "$backupdir" ]; then
+        echo "$backupdir not exits" $?
+        return 0
+    else
+        echo $list | tr ' ' '\n' | xargs -n1 -i{} rsync -arvAX --delete --exclude-from="$directoryhome.list" $backupdir/config{} $directoryconfig || echo "somthing wrong happed" $?
+        echo $listfiles | tr ' ' '\n' | xargs -n1 -i{} rsync -arvAX --delete --exclude-from="$directoryhome.list" $backupdir/home{} $directoryhome || echo "somthing wrong happed" $?
+        sleep 3
+        echo "[!] Checking if have root access"
+    fi
+    if [ "$EUID" -ne 0 ]; then
+        echo "Please run as root"
+        exit
+    else
+        echo $listroot | tr ' ' '\n' | xargs -n1 -i{} rsync -arvAX --delete --exclude-from="$directoryhome/.list" {} $backupdir/etc/ || echo "somthing wrong happed" $?
+        notify-send backup "restoring files wash succefull" -i /usr/share/icons/Papirus-Dark/32x32/apps/bluemail.svg
+    fi
+}
+function shred() {
+    function shback() {
+        echo -en "Are You sure (Y/N) : "
+        read smoke
+        if [ $smoke == "y" ]; then
+            echo "Starting shred"
+            for i in $files; do
+                echo "is this file $i"
+            done
+            exit 0
+        else
+            echo "OK!"
+            exit 1
+        fi
+    }
+    case $1 in
+    backup) shback ;;
+    home-config) echo "[!!!!!!] HOMEEEEEEEEEEEEEEEEEEE-CCC" ;;
+    home) echo "[!!!!!!!!!] HOME" ;;
+    esac
+}
+function missing() {
+    for i in $(echo $listfiles | tr ' ' '\n'); do
+        if [ ! -f $directoryhome$i -a ! -d $directoryhome$i ]; then
+            echo -e "[\e[1;31m!\e[0m] missing \e[1;31m$directoryhome$i\e[0m"
+        else
+            echo -e "[\e[1;32m+\e[0m] exits \e[1;32m$directoryhome$i\e[0m"
+        fi
+    done
+    for i in $(echo $list | tr ' ' '\n'); do
+        if [ ! -d $directoryconfig$i -a ! -f $directoryconfig$i ]; then
+            echo -e "[\e[1;31m!\e[0m] missing \e[1;31m$directoryconfig$i\e[0m"
+        else
+            echo -e "[\e[1;32m+\e[0m] exits \e[1;32m$directoryconfig$i\e[0m"
+        fi
+    done
+}
+while getopts "bcx:rvqph:s" opt; do
+    case "$opt" in
+    s) sync ;;
+    b) backup "$@" ;;
+    x) shred "$1" ;;
+    r) restore ;;
+    c) missing "$2" ;;
+    h) showHelp ;;
+    v) VERBOSE=$(((VERBOSE + 1) % 4)) ;;
+    q) VERBOSE=-1 ;;
+    p) PLAIN=1 RED="" GREEN="" YELLOW="" CLEAR="" ;;
+    ?) error "Unknown option $OPTARG" ;;
+    esac
+done
+shift $((OPTIND - 1))

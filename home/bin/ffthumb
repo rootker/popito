@@ -1,0 +1,200 @@
+#!/bin/bash
+#
+# Video/Photo thumbnailer
+# ./ffthumb VID|PIC|NUM
+# will create default size 180x140 png thumbnails
+# 9 photos in 3x3 grid, and one extra on the side of #1
+# pictures will be scaled down and fit on a pad or cropped (keeping aspect ratio)
+# can be used in CSS to create an animated loop through of 9 picture preview thumbs
+#
+# WARNING: IF YOU RUN THIS IN 'NUM' MODE IN ANY FOLDER IT WILL MAKE ALL FILES
+# NUMBERIZED 1.ext, 2.ext, 3.ext...!!!**WARNING**
+#
+# Author: Twily                                   2018
+# Website: twily.info
+# Uses: ffprobe, ffmpeg, bc, find, sort, cut, rev, zip
+#
+
+MODE="$1" # VID %video% %thumbname% | PIC %folder% %thumbname% | NUM %folder%
+IN="$2" # Input folder with pictures (numberized) or a video file
+TMBOUT="$3" # Thumbs output name
+
+SIZE_W=180 # Width for each frame (grid is x3)
+SIZE_H=140 # Height for each frame (grid is x3)
+
+BG="#000000" # Only for scale mode (pads)
+CROPORSCALE="CROP" # SCALE | CROP | STRETCH
+FORMAT="jpg" # Out format png|jpg
+QUALITY="-q:v 1" # Only JPG, leave blank otherwise
+
+case "$MODE" in
+    "VID") # Create 3x3 + 1 thumbnail for video file
+        LN=$(ffprobe -i "$IN" -show_entries format=duration -v quiet -of csv='p=0')
+        WH=$(ffprobe -i "$IN" -show_streams -v quiet|grep "width\|height" | cut -d = -f 2)
+        WH=(${WH[0]})
+        W=${WH[0]}
+        H=${WH[1]}
+        
+        AMODE=0
+        if [ $W -gt $H ]; then
+            AMODE=1
+            ASPECT=$(echo "$W/$H" | bc -l)
+        else
+            AMODE=-1
+            ASPECT=$(echo "$H/$W" | bc -l)
+        fi
+        
+        OUT=$(echo "$IN" | cut -d. -f1)
+        PAT=$(echo "$OUT" | cut -d/ -f1)
+        #TMB="$PAT/$TMBOUT"
+        TMB="$TMBOUT"
+        if [ -z "$TMBOUT" ]; then TMB=$OUT; fi
+        
+        case "$CROPORSCALE" in
+            "SCALE")
+                if [ $AMODE -eq 1 ]; then
+                    PAD=$(echo "($SIZE_W-($SIZE_W*$ASPECT))/2" | bc)
+                    ffmpeg -i "$IN" -vf "fps=9/$LN,scale=$SIZE_W:-1,pad=$SIZE_W:$SIZE_H:0:$PAD:$BG,tile=3x3" $QUALITY "$TMB""_.$FORMAT" -y
+                elif [ $AMODE -eq -1 ]; then
+                    PAD=$(echo "($SIZE_H-($SIZE_H*$ASPECT))/2" | bc)
+                    ffmpeg -i "$IN" -vf "fps=9/$LN,scale=-1:$SIZE_H,pad=$SIZE_W:$SIZE_H:$PAD:0:$BG,tile=3x3" $QUALITY "$TMB""_.$FORMAT" -y
+                fi
+            ;;
+            "CROP")
+                if [ $AMODE -eq 1 ]; then
+                    POS=$(echo "(($SIZE_H*$ASPECT)-$SIZE_W)/2" | bc)
+                    ffmpeg -i "$IN" -vf "fps=9/$LN,scale=-1:$SIZE_H,crop=$SIZE_W:$SIZE_H:$POS:0,tile=3x3" $QUALITY "$TMB""_.$FORMAT" -y
+                elif [ $AMODE -eq -1 ]; then
+                    POS=$(echo "(($SIZE_W*$ASPECT)-$SIZE_H)/2" | bc)
+                    ffmpeg -i "$IN" -vf "fps=9/$LN,scale=$SIZE_W:-1,crop=$SIZE_W:$SIZE_H:0:$POS,tile=3x3" $QUALITY "$TMB""_.$FORMAT" -y
+                fi
+            ;;
+            "STRETCH")
+                ffmpeg -i "$IN" -vf "fps=9/$LN,scale=$SIZE_W:$SIZE_H,tile=3x3" $QUALITY "$TMB""_.$FORMAT" -y
+            ;;
+        esac
+  
+        ffmpeg -i "$TMB""_.$FORMAT" -vf  "crop=$SIZE_W:$SIZE_H:0:0" "$TMB.$FORMAT" -y
+    ;;
+    "PIC") # Create 3x3 + all thumbnails for a picture folder (Need to be numbered 1..2..3..)
+        FILES=()
+        while IFS= read -r -d $'\0'; do
+            FILES+=("$REPLY")
+        done < <(find "$IN" -maxdepth 1 -type f -print0 | sort -z)
+
+        PAT=$(echo "$IN"|rev|cut -d/ -f1|rev)
+        TMB="$IN/$TMBOUT"
+        if [ -z "$TMBOUT" ]; then TMB="$IN/$PAT"; fi
+
+        rm -rf "$IN/thumbs"
+        zip -j "$TMB".zip "$IN"/*
+        mkdir -p "$IN/thumbs"
+
+        for x in ${FILES[@]}; do
+            CUR=$(echo $x|rev|cut -d/ -f1|rev)
+            EXT=$(echo $x|rev|cut -d. -f1|rev)
+            NAM=$(echo $CUR|rev|cut -d. -f2|rev)
+            OUT="$IN/thumbs/$NAM"
+            PIC="$IN/$CUR"
+
+            WH=$(ffprobe -i "$PIC" -show_streams -v quiet|grep "width\|height" | cut -d = -f 2)
+            WH=(${WH[0]})
+            W=${WH[0]}
+            H=${WH[1]}
+
+            AMODE=0
+            if [ $W -gt $H ]; then
+                AMODE=1
+                ASPECT=$(echo "$W/$H" | bc -l)
+            else
+                AMODE=-1
+                ASPECT=$(echo "$H/$W" | bc -l)
+            fi
+        
+            case "$CROPORSCALE" in
+                "SCALE")
+                    if [ $AMODE -eq 1 ]; then
+                        PAD=$(echo "($SIZE_W-($SIZE_W*$ASPECT))/2" | bc)
+                        ffmpeg -i "$PIC" -vf "scale=$SIZE_W:-1,pad=$SIZE_W:$SIZE_H:0:$PAD:$BG" $QUALITY "$OUT"".$FORMAT" -y
+                    elif [ $AMODE -eq -1 ]; then
+                        PAD=$(echo "($SIZE_H-($SIZE_H*$ASPECT))/2" | bc)
+                        ffmpeg -i "$PIC" -vf "scale=-1:$SIZE_H,pad=$SIZE_W:$SIZE_H:$PAD:0:$BG" $QUALITY "$OUT"".$FORMAT" -y
+                    fi
+                ;;
+                "CROP")
+                    if [ $AMODE -eq 1 ]; then
+                        POS=$(echo "(($SIZE_H*$ASPECT)-$SIZE_W)/2" | bc)
+                        ffmpeg -i "$PIC" -vf "scale=-1:$SIZE_H,crop=$SIZE_W:$SIZE_H:$POS:0" $QUALITY "$OUT"".$FORMAT" -y
+                    elif [ $AMODE -eq -1 ]; then
+                        POS=$(echo "(($SIZE_W*$ASPECT)-$SIZE_H)/2" | bc)
+                        ffmpeg -i "$PIC" -vf "scale=$SIZE_W:-1,crop=$SIZE_W:$SIZE_H:0:$POS" $QUALITY "$OUT"".$FORMAT" -y
+                    fi
+                ;;
+                "STRETCH")
+                    ffmpeg -i "$PIC" -vf "scale=$SIZE_W:$SIZE_H" $QUALITY "$OUT"".$FORMAT" -y
+                ;;
+            esac
+        done
+        
+        MAXW=$(echo "$SIZE_W*3" | bc)
+        MAXH=$(echo "$SIZE_H*3" | bc)
+        X2=$(echo "$MAXW-$SIZE_W" | bc)
+        X1=$(echo "$X2-$SIZE_W" | bc)
+        Y2=$(echo "$MAXH-$SIZE_H" | bc)
+        Y1=$(echo "$Y2-$SIZE_H" | bc)
+        T="$IN/thumbs/"
+
+        ffmpeg -i "$T""1.$FORMAT" -i "$T""2.$FORMAT" -i "$T""3.$FORMAT" -i "$T""4.$FORMAT" -i "$T""5.$FORMAT" \
+            -i "$T""6.$FORMAT" -i "$T""7.$FORMAT" -i "$T""8.$FORMAT" -i "$T""9.$FORMAT" -filter_complex \
+                    "nullsrc=size=$MAXW""x""$MAXH [base]; \
+                    [0:v] scale=$SIZE_W""x""$SIZE_H [upperleft]; \
+                    [1:v] scale=$SIZE_W""x""$SIZE_H [uppermiddle]; \
+                    [2:v] scale=$SIZE_W""x""$SIZE_H [upperright]; \
+                    [3:v] scale=$SIZE_W""x""$SIZE_H [left]; \
+                    [4:v] scale=$SIZE_W""x""$SIZE_H [middle]; \
+                    [5:v] scale=$SIZE_W""x""$SIZE_H [right]; \
+                    [6:v] scale=$SIZE_W""x""$SIZE_H [lowerleft]; \
+                    [7:v] scale=$SIZE_W""x""$SIZE_H [lowermiddle]; \
+                    [8:v] scale=$SIZE_W""x""$SIZE_H [lowerright]; \
+                    [base][upperleft] overlay=shortest=1 [tmp1]; \
+                    [tmp1][uppermiddle] overlay=shortest=1:x=$X1 [tmp2]; \
+                    [tmp2][upperright] overlay=shortest=1:x=$X2 [tmp3]; \
+                    [tmp3][left] overlay=shortest=1:y=$Y1 [tmp4]; \
+                    [tmp4][middle] overlay=shortest=1:x=$X1:y=$Y1 [tmp5]; \
+                    [tmp5][right] overlay=shortest=1:x=$X2:y=$Y1 [tmp6]; \
+                    [tmp6][lowerleft] overlay=shortest=1:y=$Y2 [tmp7]; \
+                    [tmp7][lowermiddle] overlay=shortest=1:x=$X1:y=$Y2 [tmp8]; \
+                    [tmp8][lowerright] overlay=shortest=1:x=$X2:y=$Y2" $QUALITY "$TMB""_.$FORMAT" -y
+
+            cp "$T""1.$FORMAT" "$TMB.$FORMAT"
+    ;;
+    "NUM") # Number *ALL* and any pictures/files in a directory (*WARNING*)
+        echo "*WARNING* This will numberize ALL files located in '$IN'!"
+        echo "Are you sure you want to continue? Type 'yes':"
+        read okrun
+
+        if [ "$okrun" == "yes" ]; then
+            FILES=()
+            while IFS= read -r -d $'\0'; do
+                FILES+=("$REPLY")
+            done < <(find "$IN" -maxdepth 1 -type f -print0 | sort -z)
+
+            IDX=1
+            for x in ${FILES[@]}; do
+                CUR=$(echo $x|rev|cut -d/ -f1|rev)
+                EXT=$(echo $x|rev|cut -d. -f1|rev)
+                NEW="$IDX.$EXT"
+
+                echo "$IN/$CUR => $IN/$NEW"
+                mv "$IN/$CUR" "$IN/$NEW"
+                ((++IDX))
+            done
+        else
+            echo "Terminated."
+        fi
+    ;;
+    *)
+        echo "No mode selected, use VID | PIC | NUM"
+    ;;
+esac
+exit

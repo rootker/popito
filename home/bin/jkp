@@ -1,0 +1,38 @@
+#!/bin/bash 
+yearmonth=`date "+%Y/%m"`
+postdate=`date "+%Y-%m-%d"`
+jekylldate=`date "+%Y-%m-%d"`
+open_direct="no"
+_posts="/home/moux/gits/site/_posts"
+layout="post"
+file="$_posts/$yearmonth/$postdate-"$1".markdown"
+if [ -z "$1" ];then
+    echo "USAGE : $0 filename";
+    exit 0
+fi
+if [ ! -d $_posts/$yearmonth ];then echo -e "[-] it sems folder doesnt exists";echo -e "[+] creating folder";mkdir -p $_posts/$yearmonth;echo -e '[!] folder created';fi 
+if [ ! -f "$file" ];then
+echo -e "[+] file have been created"
+echo -e "[.] adding default layout"
+touch $_posts/$yearmonth/$postdate-"$1".markdown &&
+cat <<EOF > $_posts/$yearmonth/$postdate-"$1".markdown
+---
+layout: $layout
+date: $jekylldate
+title: "$1"
+excerpt:
+---
+EOF
+else 
+    echo "file already exits"
+    exit 0
+fi
+if [ $? != "0" ];then
+    echo "Somthing Wrong"
+fi
+if [ $open_direct == "no" ];then
+    exit 0
+else
+    mate _posts/$yearmonth/$postdate-"$1".markdown
+fi 
+exit 0

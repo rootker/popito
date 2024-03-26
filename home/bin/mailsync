@@ -1,0 +1,17 @@
+#!/bin/sh
+# Sync my email using mbsync, reindex via notmuch, print the amount of new messages.
+rbw unlock
+mbsync -c /Users/alex/.config/mbsync/mbsyncrc -Va
+notmuch-hook
+notification_str=""
+for i in ~/Mail/mohamed@cock.li/*/[Ii][Nn][Bb][Oo][Xx]/new; do
+  mailbox_name="$(printf "%s" "$i" | sed 's:^.*mail/::; s:/[Ii][Nn][Bb][Oo][Xx]/new.*$::')"
+  num_new_messages="$(find "$i"/* -type f 2>/dev/null | wc -l)"
+  [ "$num_new_messages" -gt 0 ] \
+    && notification_str="${notification_str}
+$(printf "%s: %d" "$mailbox_name" "$num_new_messages")"
+
+done
+
+{ [ -n "$notification_str" ] && notify "Mail synced" "$notification_str" mail; } \
+  || notify "Mail synced" "No new messages" mail

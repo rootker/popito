@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Author:      Twily                                                      2017
+# Description: Grab random wallpaper from http://wallpaperswide.com once a day
+# Usage:       $ nohup ./dailywall > /dev/null 2>&1 &
+# Requires:    xwininfo, awk, wget
+#
+
+lock() {
+    exec 200>/var/lock/.dailywall.exclusivelock
+    flock -n 200 && return 0 || return 1
+}
+lock || exit 1
+
+# (RES eg.: 1920x1080)
+RES=$( xwininfo -root | grep geometry | awk -F" " '{print $2}' | awk -F"+" '{print $1}' )
+
+DIR=/tmp/
+LST=$DIR"list.html"
+ITM=$DIR"item.html"
+
+SET="21:37"
+
+wallpaper() {
+    RND=$( shuf -i 1-5 -n 1 )
+
+    wget http://wallpaperswide.com/top_wallpapers/page/$RND -O $LST
+    #wget http://wallpaperswide.com/artistic-desktop-wallpapers/page/$RND -O $LST
+
+    sed -i '/-wallpapers\.html/!d' $LST
+    sed -i '/     /!d' $LST
+    sed -i 's/^.*href="\///' $LST
+    sed -i 's/" title=.*$//' $LST
+    sed -i '/_/!d' $LST
+
+    IMG=$( shuf -n 1 $LST )
+    NAM=$( echo $IMG | awk -F"-" '{print $1}' )
+
+    wget http://wallpaperswide.com/$IMG -O $ITM
+
+    sed -i "/$NAM/!d" $ITM
+    sed -i "/$RES/!d" $ITM
+    sed -i 's/^.*href="\///' $ITM
+    sed -i 's/" title=.*$//' $ITM
+
+    IMG=$( cat $ITM )
+    EXT=$( echo $IMG | awk -F"." '{print $2}' )
+    PIC=$DIR"$NAM.$EXT"
+
+    wget http://wallpaperswide.com/$IMG -O $PIC
+
+    # Chose software to set $PIC as wallpaper (!system specific!)
+    #pcmanfm --set-wallpaper $PIC
+    feh --bg-fill $PIC
+}
+
+while :; do
+    TIM=$( date +"%H:%M" )
+
+    if [ "$SET" == "$TIM" ]; then
+        wallpaper
+
+        sleep 50
+    fi
+
+    sleep 10
+done

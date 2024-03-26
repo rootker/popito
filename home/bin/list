@@ -1,0 +1,7 @@
+#!/bin/sh
+grepflags=-rnE
+if [ "$1" = "-i" ]; then
+	grepflags="${grepflags}i"
+	shift
+fi
+grep "$grepflags" "$1" | grep -vE '^tags' | less -iF

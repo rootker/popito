@@ -1,0 +1,12 @@
+#!/bin/sh
+printf "pass> "
+stty -echo
+read -r pass_str
+stty echo
+sha1=$(printf "%s" "$pass_str" | tr -d '\n' | shasum -a 1)
+prefix=$(printf "%s" "$sha1" | cut -c-5)
+suffix=$(printf "%s" "$sha1" | cut -c6-35)
+printf "Hash prefix: %s\n" "$prefix"
+printf "Hash suffix: %s\n" "$suffix"
+result=$(curl -sL https://api.pwnedpasswords.com/range/"$prefix" 2>/dev/null | grep -i "$suffix")
+echo "Count: ${result#*:}"

@@ -1,0 +1,185 @@
+#!/bin/sh
+set -e
+
+version=1.1.1
+
+#b2_account="$(pass Online/backblaze.com-anders@adamsgaard.dk-account-id)"
+b2_account="$(pass email/acc-id)"
+#b2_key="$(pass Online/backblaze.com-anders@adamsgaard.dk-master-application-key)"
+b2_key="$(pass email/naichiroot-key@backblase.com)"
+# from `gpg --list-public-keys anders@adamsgaard.dk`
+enc_key="969BAB3AF40E0FA2DF1710FBA7821EA7854C9D20"
+sgn_key="$enc_key"
+
+PASSPHRASE="$(pass email/naichiroot@backblase.com)"
+SIGN_PASSPHRASE="$PASSPHRASE"
+
+duplicity_with_opts() {
+	duplicity --progress --sign-key $sgn_key --encrypt-key $enc_key "$@"
+}
+
+show_help() {
+	echo "usage: ${0##*/} [OPTIONS] [COMMAND[S]]"
+	echo "is a wrapper for the duplicity command for communicating with an"
+	echo "encrypted backup in backblaze B2 storage."
+	echo "COMMAND can be one of the following:"
+	echo "   backup              Backup /home, /etc, and /user, and clean out"
+	echo "                       old backups and failures"
+	echo "   list                List all files in latest backup set"
+	echo "   status              Show status of all backups"
+	echo "   restore SRC DST     Restore SRC file or dir from backup to local"
+	echo "                       DST. The SRC must be the path listed as the"
+	echo "                       last column from the 'list' command"
+	echo
+	echo "OPTIONS are one or more of the following:"
+	echo "   -h, --help          show this message"
+	echo "   -v, --version       show version and license information"
+	echo "   -V, --verbose       show verbose information"
+	echo "   --                  do not consider any following args as options"
+}
+
+show_version() {
+	echo "${0##*/} version $version"
+	echo "Licensed under the GNU Public License, v3+"
+	echo "written by Anders Damsgaard, anders@adamsgaard.dk"
+	echo "https://gitlab.com/admesg/dotfiles"
+}
+
+die() {
+	printf '%s\n' "$1" >&2
+	unset PASSPHRASE
+	unset SIGN_PASSPHRASE
+	exit 1
+}
+
+duplicity_backup_b2() {
+	local_dir="$1"
+	b2_dir="$2"
+
+	echo "Backing up $1..."
+	if [ "$local_dir" = "/home" ]; then
+		duplicity_with_opts \
+		    --full-if-older-than 30D \
+		    --exclude ~/tmp --exclude ~/.cache --exclude ~/videos/tmp \
+		    "$local_dir" b2://"$b2_account":"$b2_key"@"$b2_dir"
+	else
+		duplicity_with_opts \
+		    --full-if-older-than 30D \
+		    "$local_dir" b2://"$b2_account":"$b2_key"@"$b2_dir"
+	fi
+
+	echo "Cleaning up old backups..."
+	duplicity_with_opts \
+	    remove-older-than 90D \
+	    b2://"$b2_account":"$b2_key"@"$b2_dir"
+
+	echo "Cleaning up failures..."
+	duplicity_with_opts \
+	    cleanup --force \
+	    b2://"$b2_account":"$b2_key"@"$b2_dir"
+
+	echo "B2 collection status:"
+	duplicity_with_opts \
+	    collection-status \
+	    b2://"$b2_account":"$b2_key"@"$b2_dir"
+}
+
+status_b2() {
+	printf "\n## %s\n" "$1"
+	duplicity_with_opts \
+	    collection-status \
+	    b2://"$b2_account":"$b2_key"@"$1"
+}
+
+list_status_b2() {
+	status_b2 "$(hostname)-new-home"
+	status_b2 "$(hostname)-new-etc"
+	status_b2 "$(hostname)-new-usr"
+}
+
+backup_b2() {
+	duplicity_backup_b2 /home/tsokkur/fil "$(hostname)-new-home"
+	#duplicity_backup_b2 /etc "$(hostname)-new-etc"
+	# duplicity_backup_b2 /usr "$(hostname)-new-usr"
+}
+
+duplicity_list_backup_b2() {
+	duplicity_with_opts \
+	    list-current-files \
+	    b2://"$b2_account":"$b2_key"@"$1"
+}
+
+list_backups_b2() {
+	duplicity_list_backup_b2 "$(hostname)-new-home"
+	#duplicity_list_backup_b2 "$(hostname)-new-etc"
+	#duplicity_list_backup_b2 "$(hostname)-new-usr"
+}
+
+restore_from_backup_b2() {
+	[ -n "$1" ] || die 'error: supply a <source> and <destination>'
+	[ -n "$2" ] || die 'error: missing <destination>'
+	case "$1" in
+		ad*)
+			archive=berdhy-new-home
+			;;
+		etc*)
+			archive=berdhy-new-etc
+			;;
+		usr*)
+			#archive=idkfa-new-usr
+			archive=berdhy-new-usr
+			;;
+	esac
+
+	duplicity_with_opts --file-to-restore "$1" b2://"$b2_account":"$b2_key"@"$archive" "$2"
+}
+
+while :; do
+	case "$1" in
+		-h|-\?|--help)
+			show_help
+			exit 0
+			;;
+		-v|--version)
+			show_version
+			exit 0
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'Error: Unknown option specified'
+			;;
+		*)  # No more options
+			break
+	esac
+	shift
+done
+
+export PASSPHRASE
+export SIGN_PASSPHRASE
+
+if [ $# -lt 1 ]; then
+	die 'error: no COMMAND specified, see --help'
+fi
+
+case "$1" in
+	backup)
+		backup_b2
+		;;
+	status)
+		list_status_b2
+		;;
+	list)
+		list_backups_b2
+		;;
+	restore)
+		restore_from_backup_b2 "$2" "$3"
+		;;
+	*)
+		die 'error: invalid COMMAND specified, see --help'
+esac
+
+unset PASSPHRASE
+unset SIGN_PASSPHRASE

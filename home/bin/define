@@ -1,0 +1,95 @@
+#!/bin/sh
+set -e
+history_file=~/.cache/define.hist
+history_length=100
+
+show_help() {
+	echo "usage: ${0##*/} [OPTIONS] TERM[S]"
+	echo "shows definitions for each TERM from dict.org"
+	echo
+	echo "Options:"
+	echo "   -g, --gui          use dmenu for input and notify for output"
+	echo "   -np, --no-pager    do not use a pager for long output"
+	echo "   -h, --help         show this message"
+}
+
+prepare_history_file() {
+	mkdir -p "$(dirname "$history_file")"
+	[ ! -f "$history_file" ] && touch "$history_file" || :
+}
+
+trim_history_file() {
+	if [ "$(wc -l "$history_file"|awk '{print $1}')" -ge $history_length ]; then
+		tail -n $history_length "$history_file" > "${history_file}.tmp" && \
+		mv "${history_file}.tmp" "${history_file}"
+	fi
+}
+
+add_to_history() {
+	printf '%s\n' "$1" >> "$history_file"
+}
+
+define() {
+	add_to_history "$1"
+	curl --silent dict://dict.org/d:"$1"
+	trim_history_file
+}
+
+remove_comm_msgs() {
+	grep -vE '[0-9][0-9] ' | \
+		sed 's/^\.//'
+}
+
+die() {
+	printf '%s\n' "$1" >&2
+	exit 1
+}
+
+gui=0
+pager=1
+while :; do
+	case "$1" in
+		-h|-\?|--help)
+			show_help
+			exit 0
+			;;
+		-g|--gui)
+			gui=1
+			;;
+		-np|--no-pager)
+			pager=0
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'ERROR: Unknown option specified'
+			;;
+		*)  # no more options
+			break
+	esac
+	shift
+done
+
+prepare_history_file
+
+if [ "$gui" = 1 ]; then
+	suggestions="$(printf '%s\n' "$(xclip -o)"; cat "$history_file")"
+	word=$(echo "$suggestions" | dmenu -i -p "Dictionary lookup:") || exit 1
+	notify -t 10000 "define: $word" "$(define "$word" | remove_comm_msgs)"
+	exit 0
+else
+	[ $# -lt 1 ] && (show_help && exit 1)
+fi
+
+definition=""
+for word in "$@"; do
+	definition="${definition}\n$(define "$word" | remove_comm_msgs)"
+done
+if [ "$(printf "%s" "$definition" | wc -l)" -gt "$(tput lines)" ] && \
+	[ "$pager" = 1 ]; then
+	printf "%s" "$definition" | tail -n +2 | less
+else
+	printf "%s" "$definition" | tail -n +2
+fi

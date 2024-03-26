@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 [amount] [currency1] [currency2]"
+    echo
+    echo "If currency1 and currency2 and are not defined they default to USD and DKK, respectively."
+    echo "Currency strings are not case sensitive. The amount defaults to 1."
+    echo
+    echo "Example 1: $0 USD GBP"
+    echo "Example 2: $0 42"
+    echo "Example 3: $0 14 GBP EUR"
+    exit 0
+fi
+
+if [ -n "$1" ]; then a=$1; else a=1; fi
+if [ -n "$2" ]; then from=$(echo "$2" | awk '{print toupper($0)}'); else from=ARS; fi
+if [ -n "$3" ]; then to=$(echo "$3" | awk '{print toupper($0)}'); else to=MAD; fi
+if [ "$to" = "$from" ]; then echo "Nothing to do!"; exit 2; fi
+#url="https://anyapi.io/api/v1/exchange/convert?base=USD&to=EUR&amount=$1&apiKey=8bkseluq3urno670r59ugvif99hoevt86fqls99nef8o9jlc6gpuq"
+#curl -s -XGET "https://api.exchangerate.host/convert?from=$from&to=$to&amount=$1"
+url="https://api.exchangerate.host/convert?from=$from&to=$to&amount=$1"
+#curl -X 'GET' 'https://anyapi.io/api/v1/exchange/convert?base=USD&to=MAD&amount=20&apiKey=8bkseluq3urno670r59ugvif99hoevt86fqls99nef8o9jlc6gpuq' | jq
+#url="https://free.currencyconverterapi.com/api/v6/convert?q=${from}_${to}&compact=ultra&apiKey=$(pass Online/currencyconverterapi.com-apikey)"
+result="$(curl "$url" 2>/dev/null | sed 's/.*://;s/}$//')"
+
+if [ -n "$result" ]; then
+	echo "$a $from = $(echo "${result}") $to"
+else
+	echo "error: could not get conversion"
+	exit 1
+fi

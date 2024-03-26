@@ -1,0 +1,26 @@
+#!/bin/sh
+
+die() {
+	printf '%s: error: %s\n' "${0##*/}" "$1" >&2
+	exit 1
+}
+
+if command -v hurl >/dev/null 2>&1; then
+	downloader=hurl
+elif command -v curl >/dev/null 2>&1; then
+	downloader="curl -s"
+else
+	die 'hurl or curl not found'
+fi
+
+if [ $# -eq 0 ] || [ "$1" = "dr" ]; then
+	$downloader https://www.dr.dk/nyheder/service/feeds/allenyheder | \
+		sfeed | sfeed_curses
+elif [ "$1" = "npr" ]; then
+	url="https://text.npr.org"
+elif [ "$1" = "cnn" ]; then
+	url="https://lite.cnn.io/en"
+else
+	url="$1"
+fi
+[ -n "$url" ] && w3m "$url" || :

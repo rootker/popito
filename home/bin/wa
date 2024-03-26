@@ -1,0 +1,150 @@
+#!/bin/env bash
+ca="$HOME/.cache/.wa"
+default="/home/$USER/tsokkur/Pictures"
+animewl="$HOME/personal/git/walls/anime"
+preview=0
+prompt=0
+dependes=(nitrogen file)
+for i in ${dependes[@]};do
+if ! command -v $i 1>/dev/null;then 
+	echo "command not found $i" 
+	exit 123
+fi
+done
+# Function to display the help menu for the "wa" command
+wa_help() {
+  echo "Usage: wa [FLAGS]"
+  echo ""
+  echo "FLAGS:"
+  echo "  -r, --random      Set a random wallpaper from a specific directory"
+  echo "  -f, --file        Set the wallpaper from a specified file"
+  echo "  -d, --delete      Delete the current wallpaper"
+  echo "  -x, --favorite    Search in favorite wallpapers and set as wallpaper"
+  echo "  -v, --add-favorite Add the current wallpaper to the favorites list"
+  echo "  -s, --search      Search for wallpapers"
+  echo "  -p, --preview     Use with -s to have a preview of the search results"
+  echo ""
+  echo "Examples:"
+  echo "  wa -r /path/to/directory"
+  echo "    Set a random wallpaper from the specified directory."
+  echo "  wa -f /path/to/file.jpg"
+  echo "    Set the wallpaper to the specified file."
+  echo "  wa -d"
+  echo "    Delete the current wallpaper."
+  echo "  wa -x"
+  echo "    Search in favorite wallpapers and set as wallpaper."
+  echo "  wa -v keyword"
+  echo "    Add the current wallpaper to the favorites list."
+  echo "  wa -s keyword"
+  echo "    Search for wallpapers with the specified keyword."
+  echo "  wa -ps keyword"
+  echo "    Search for wallpapers with the specified keyword and preview the results."
+}
+favorate(){
+store="$HOME/.cache/.fav"
+check=$(cat $ca | xargs -IO grep O $store)
+if [ "$check" != "" ];then
+	echo "Favor already exits -> $check"
+	return 1
+else
+	cat $ca | xargs -IO echo ${2:-fav} : O >> $store 
+	if [ $? -eq 0 ];then
+		echo "Favor added -> $check"
+	else
+		echo "There in error"
+	fi
+fi
+}
+fromfile(){
+	 if [ -z $2 ];then
+		 return 1;
+	else
+	 image=$(file "${2:?"file name missing"}" | grep -o image | head -1)
+	 if [ -f "${2}" ] && [ "$image" == "image" ];then
+        nitrogen --set-zoom-fill "${2}" --save 2>/dev/null|| echo "somthing wrong" 
+        echo "[!] Wallpaper Path : ${2}" 
+        echo $2 > $ca
+else 
+	echo "EROKOKO" 
+fi
+fi
+ }
+ random(){
+	if [[ "$2" == "anime" ]];then
+        imagename=$(/bin/ls -Rt -d -1 $animewl/* | grep -E '.jpg$|\.png$|\.jpeg$|.webmp' | shuf | head -1)
+        nitrogen --set-zoom-fill $imagename --save 2>/dev/null|| echo "somthing wrong" 
+        echo "[!] Wallpaper Path : $imagename" 
+        echo $imagename >> $ca
+        exit 0
+	fi
+    if [[ -d "$defualt" ]];then
+        echo "Directory Not Found"
+        exit 1
+    fi
+    if [[ "$2" == "-p" ]];then
+	p=$(realpath $HOME/personal/git/walls)
+	names=($(cd /home/tsokkur/personal/git/walls && ls -d */ $p))
+	select a in ${names[@]}
+	do
+		wa -r $p/$a
+		exit 
+	done
+
+    fi
+    if [[ -z $2 ]];then
+        def="/home/$USER/personal/git/walls/"
+        imagename=$(find ${def}* -type f |  grep -E '.jpg$|\.png$|\.jpeg$|.webmp' | shuf | head -1)
+        nitrogen --set-zoom-fill $imagename --save 2>/dev/null|| echo "somthing wrong" 
+        echo "[!] Wallpaper Path : $imagename"
+        echo $imagename > $ca
+        exit 0
+    fi
+        #/bin/ls -Rt -d -1 $default/{*,.*} | egrep '.jpg$|\.png$|\.jpeg$|.webmp' | shufb81f369cccadd5ab17f81a8ab3daeb44de6 | head -1|xargs nitrogen --set-tiled 2>/dev/null
+        imagename=$(/bin/ls -Rt -d -1 $2/* | grep -E '.jpg$|\.png$|\.jpeg$|.webmp' | shuf | head -1)
+        nitrogen --set-zoom-fill $imagename --save 2>/dev/null|| echo "somthing wrong" 
+        echo "[!] Wallpaper Path : $imagename"
+        echo $imagename > $ca
+        exit 0
+       if [ $? != 0 ];then
+            echo "There Unkown Error $#"
+   fi
+    if [[ ! -z $1 ]];then
+        dir=$(pwd)
+        find $1 -type f |  grep -E '.jpg$|\.png$|\.jpeg$|.webmp' | shuf | head -1 >! $ca 
+        cat $ca | xargs nitrogen --set-zoom-fill --save 
+        echo "[!] wallpaper is $(cat $ca)" 
+    exit 0
+    fi
+  read -p "Enter Directory Name : " dir
+    if [[ "${dir:-$default}" == "" ]];then
+        echo "U have to Enter Dir"
+    elif [[ $# != 0 ]];then
+        echo "There Unkown Error"
+    else
+      /bin/ls -Rt -d -1 ${dir:-$default}/* | grep -E '.jpg$|\.png$|\.jpeg$|.webmp' | shuf | head -1|xargs nitrogen --set-zoom-fill --save
+    exit 0
+    fi
+}
+search(){
+	if [ $preview == 0 ];then
+		find "$HOME/personal/git/walls" -name '*.jpg' -o -name '*.png'| grep -i $2 |fzf --layout=reverse --height=30 | xargs wa -f 
+	else
+		#find "$HOME/personal/walls" -name '*.jpg' -o -name '*.png'| grep -i $2 |fzf --layout=reverse --height=20 --preview="chafa {}" | xargs wa -f 
+		find "$HOME/personal/git/walls" -name '*.jpg' -o -name '*.png'| grep -i $2 |uebb| xargs wa -f 
+	fi
+}
+while getopts ":rfvdspix:" arg; do
+    case "$arg" in
+        r) random $@;; 
+	f) fromfile $@;;
+	i) prompt=1;;
+	d) [ $prompt -eq 1 ] && cat $ca | xargs -o rm -v || cat $ca | xargs -o rm -iv ;;
+	x) cat ~/.cache/.fav | grep $2 | cut -f2 -d':' | xargs ls | uebb | xargs wa -f;;
+	v) favorate $@;;
+	p) preview=1;; 
+	s) search $@;;
+	?) wa_help;exit 0;;
+        #?) echo "Option -$OPTARG requires an argument." >&2;;	
+    esac
+done
+shift $((OPTIND - 1))

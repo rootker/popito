@@ -1,0 +1,100 @@
+#!/bin/env bash
+# Make file with default beging
+DIR="$HOME/learning/ca/"
+DIR_BASH="$HOME/learning/bash/"
+cp(){
+tmp="$(mktemp -p /tmp -d "tgo_$(date +%Y%m%d)_XXXXXXXX")"
+if [ ! -z $2 ];then
+   if [ -f "$DIR${2:-main}.cpp" ];then
+	#read -p "OVERWITE : " s
+	#if [ $s == "y" ];then
+   	vim $DIR${2:-main}.cpp
+	return 0
+		else
+   	printf "#include <iostream>\nusing namespace std;\n\nclass $2\n{\n\n\n};\nint main() {\n\n\n}\n" > $DIR${2:-main}.cpp
+   	vim $DIR${2:-main}.cpp
+   	return 0
+	fi
+else
+   printf '#include <iostream>\n\nint main() {\n\n}\n' > $tmp/${2:-main}.cpp
+fi
+(
+cd "$tmp"
+vim ${2:-main}.cpp #main_test.go
+echo "$tmp"
+)
+# printf 'package main\n\nfunc TestMain(t *testing.T) {\n\n}\n\n' > "$tmp/main_test.go"
+# printf 'func BenchmarkMain(b *testing.B) {\n\tb.ReportAllocs()\n\tfor n := 0; n < b.N; n++ {\n\t}\n}\n' >> "$tmp/main_test.go"
+#printf 'module %s\n' "$(basename "$tmp")" > "$tmp/go.mod"
+}
+b_simple(){
+	if [ $# -eq 1 ];then
+		echo "$(basename $0) filename"
+	else
+		if [ -f $2 ];then
+			vim $2
+			return 0
+		else
+		cat << _EOF > $2
+#!/bin/env bash
+#
+
+_EOF
+	vim $2
+	fi
+fi
+}
+bash(){
+if [ ! -z $2 ];then
+   if [ -f "$DIR_BASH${2:-main}" ];then
+	   vim "$DIR_BASH${2:-main}"
+	   return 0
+   else
+		cat <<- EOT >  $HOME/learning/bash/$2	
+#!/bin/env bash
+
+err()
+{
+  echo >&2 "\$(tput bold; tput setaf 1)[-] ERROR: \${*}\$(tput sgr0)"
+
+  exit 1337
+}
+
+warn()
+{
+  echo >&2 "\$(tput bold; tput setaf 1)[!] WARNING: \${*}\$(tput sgr0)"
+}
+
+msg()
+{
+  echo "\$(tput bold; tput setaf 2)[+] \${*}\$(tput sgr0)"
+}
+
+check_priv()
+{
+  if [ "\$(id -u)" -ne 0 ]; then
+    err "you must be root"
+  fi
+}
+check_internet()
+{
+  tool='curl'
+  tool_opts='-s --connect-timeout 8'
+
+  if ! \$tool \$tool_opts https://microsoft.com/ > /dev/null 2>&1; then
+    err "You don't have an Internet connection!"
+  fi
+
+  return \$SUCCESS
+}
+	EOT
+	vim $DIR_BASH${2:-main}
+fi
+fi
+}
+case $1 in
+	-c|cpp) cp $@;;
+	-b|bash) bash $@;;
+	(-t) b_simple $@;;
+	*) echo "HELP";;
+esac
