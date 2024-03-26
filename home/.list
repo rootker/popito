@@ -1,0 +1,7 @@
+*.AppImage
+.git
+temp/
+tmp/
+plugged/
+deezer
+ngrok
