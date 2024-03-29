@@ -503,7 +503,7 @@ case $1 in
 esac
 }
 
-run_bg() {
+rbg() {
     nohup $@ > /tmp/$@ 2>&1 &
 }
 
@@ -512,7 +512,7 @@ if [ -z "$1" ];then
     echo "Usage : +x filename"
     return 0
 else
-    chmod +x $1 2>/dev/null && echo -e "u can now run \e[1;31m$1\e[0m" || echo -e "\e[1;31m[!]\e[0m File \e[1;31m$1\e[0m Does't exits"
+    chmod u+x $1 2>/dev/null && echo -e "u can now run \e[1;31m$1\e[0m" || echo -e "\e[1;31m[!]\e[0m File \e[1;31m$1\e[0m Does't exits"
     return 0
 fi
 }
