@@ -1,25 +1,44 @@
 #!/bin/env bash
-root="yes"
-home="yes"
-journalctl="yes"
-reload="yes"
-alllogshome="yes"
-function cl-logs(){
-if [ "$root" == "y" ] ;then
-echo -e "[\e[1;33m!\e[0m] Checking if running in UUID=0"
-	if [ $EUUID != '0' ]; then
-		echo "RUN AS ROOT!!!!!"
-	fi
-	read -p "Sure : " ys
-	echo -e "[\e[1;33m+\e[0m] Size of logs : $(journalctl --disk-usage )"
-	echo -e "[\e[1;31m!\e[0m] Starting Cleaning logs..."
-	journalctl --rotate
-	rm -rf /var/log/journal/
-	echo -e "[\e[1;34m+\e[0m] Cleaning logs is done-."	
 
-fi
+list=(
+	"/home/smoke/.cache/test.txt"
+	"/home/smoke/.cache/test2.txt"
+	)
+
+function err() {
+	echo -e "[\e[1;31m!\e[0m] $@"
 }
-# TODO
-# add all functions
-# make it clean
-# make cron
+
+function info() {
+	echo -e "[\e[1;33m+\e[0m] " $@
+}
+
+function CheckRoot() {
+	if  [ $EUID -ne 0 ];then
+		err " run as root"
+		exit 1
+	fi
+}
+
+function main(){
+	info "Size of logs : $(journalctl --disk-usage | awk '{print $7}')"
+	info "Size of \e[1;31m /var/log/journal\e[0m is $(du -hs /var/log/journal | awk '{print $1}')"
+	echo -en '[\e[1;31m!\e[0m]  Clear logs (y\N) : '
+	read log
+	if [ "$log" == "y" ] || [ "$log" == "Y" ];then
+		CheckRoot
+		journalctl --rotate
+		rm -rf /var/log/journal/
+		for i in "${list[@]}";do
+		   if [ -f "$i" ];then
+			info "  removing $i"
+			rm $i
+		   fi
+		done
+		info "Done clearning logs"
+	else 
+		echo -e '[\e[1;31m!\e[0m]  Ignoring request to remove logs '
+
+	fi
+}
+main
