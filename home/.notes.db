@@ -99,3 +99,4 @@ chmod a+rw /dev/ttyACM0
 https://phonexicum.github.io/infosec/tools.html
 20201010B
 host -t A google.com 8.8.8.8
+sudo systemctl disable man-db.service man-db.timer
