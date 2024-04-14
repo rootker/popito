@@ -1,8 +1,8 @@
-sw_volume: 90
+sw_volume: 100
 audio_device_state:1:My Pulse Output
-state: play
-current: 0
-time: 141.934000
+state: pause
+current: 3
+time: 336.608000
 random: 1
 repeat: 0
 single: 0
@@ -11,126 +11,59 @@ crossfade: 0
 mixrampdb: 0.000000
 mixrampdelay: -1.000000
 playlist_begin
-0:Draganov - 3DABI.mp3
-1:Engelbert Humperdinck - A Man Without Love.mp3
-2:Engelbert Humperdinck - Can't Take My Eyes Off You.mp3
-3:The Weeknd - Blinding Lights.mp3
-4:The Weeknd - Save Your Tears.mp3
-5:Duke - AMANA.mp3
-6:Amr Diab - Khalek Fakerny.mp3
-7:Cheb Rezki - Jat Laandi Jat.mp3
-8:Cheb Rizki - Ana Wenta Hatha L'hob.mp3
-9:Loai - Ah Ya Aini Ya Leil.mp3
-10:Inkonnu - Arabi.mp3
-11:Raid - Fuck Off 1.mp3
-12:Raid - Fuck Off III.mp3
-13:Mohammad Abdul Jabbar - Asjal Ruwhi.mp3
-14:Travis Scott - STARGAZING.mp3
-15:Travis Scott - SICKO MODE.mp3
-16:Travis Scott - YOSEMITE.mp3
-17:Travis Scott - BUTTERFLY EFFECT.mp3
-18:Loai - Bahebak.mp3
-19:Kina - Baby You're Worth It.mp3
-20:Cheb Hasni - Gaah erjal.mp3
-21:The Weeknd - Often.mp3
-22:The Weeknd - The Hills.mp3
-23:The Weeknd - Can't Feel My Face.mp3
-24:Post Malone - rockstar.mp3
-25:Post Malone - Better Now.mp3
-26:Sting - Desert Rose.mp3
-27:Michael Bublé - L O V E.mp3
-28:Kina - Can We Kiss Forever_ (feat. Adriana Proenza).mp3
-29:Cheb Hasni - Dak el mahkoum.mp3
-30:Cheb Hasni - Makadekch.mp3
-31:Cheb Hasni - C'est fini alik mahanti.mp3
-32:Mr Crazy - CHEBANI.mp3
-33:Raid - Couvre Feu.mp3
-34:Cheb Hasni - Tlabti lafrak.mp3
-35:DJ Snake - Disco Maghreb.mp3
-36:Ahmet Kaya - Giderim.mp3
-37:Ahmet Kaya - Söyle.mp3
-38:DJ Snake - Let Me Love You.mp3
-39:Billie Eilish - everything i wanted.mp3
-40:Drake - Virginia Beach.mp3
-41:Drake - IDGAF.mp3
-42:Drake - Gently.mp3
-43:Raid - Fuck Off 2.mp3
-44:Kina - Get You The Moon (feat. Snøw).mp3
-45:Moro - Godzilla.mp3
-46:Wael Jassar - Betewhashini (بتوحشيني).mp3
-47:Wael Jassar - Mesheet Khalas (مشيت خلاص).mp3
-48:Wael Jassar - Ghareebah El Nas (غريبة الناس).mp3
-49:DJ Khaled - GREECE (feat. Drake).mp3
-50:ElGrandeToto - Gueule tapée.mp3
-51:Cheb Hasni - Enfin lkit litfhamn.mp3
-52:Inkonnu - Hia B3ida.mp3
-53:Travis Scott - HIGHEST IN THE ROOM.mp3
-54:Duke - Hyati.mp3
-55:Gesaffelstein - Lost in the Fire.mp3
-56:Hans Zimmer - S.T.A.Y.mp3
-57:LUUV. - how i love you, i can't love myself.mp3
-58:Michael Bublé - Feeling Good.mp3
-59:Ufuk Çalışkan - Kalbimdesin (Stüdyoda).mp3
-60:Duke - Khssara.mp3
-61:Wael Jassar - Mawgou Garh Tany.mp3
-62:Wael Jassar - Khalina Zekra.mp3
-63:Duke - LAILI.mp3
-64:Cheb Hasni - Latbkiche.mp3
-65:Cheb Hasni - Sbaart Ou Tal Adabi.mp3
-66:Billie Eilish - lovely.mp3
-67:Moro - Wassup.mp3
-68:Moro - +212.mp3
-69:Moro - Mira.mp3
-70:Michael Bublé - Sway.mp3
-71:Dollypran - Rosita.mp3
-72:Dollypran - Umbrella.mp3
-73:The Weeknd - Call Out My Name.mp3
-74:Engelbert Humperdinck - Killing Me Softly With His Song.mp3
-75:Frank Sinatra - My Way.mp3
-76:Rida - Bahebak.mp3
-77:Kina - Nobody Cares.mp3
-78:Amr Diab - Nour El Ein.mp3
-79:Cheb Rizki - Oulou Lamma Rani Gha.mp3
-80:Cheb Rizki - Sahran Lewahdi.mp3
-81:Major Lazer - Lean On (feat. MØ & DJ Snake).mp3
-82:DJ Khaled - POPSTAR (feat. Drake).mp3
-83:Cheb Amrou - Mon mal persiste.mp3
-84:Cheb Amrou - Mon cœur est mon ennemi.mp3
-85:Cheb Amrou - Qui aurait pu prédire notre rencontre.mp3
-86:Inkonnu - Liyam.mp3
-87:Drake - Nonstop.mp3
-88:Ahmet Kaya - Kendine İyi Bak.mp3
-89:Ahmet Kaya - Doruklara Sevdalandım.mp3
-90:Blanco Palamera - Sola Con Mi Voz.mp3
-91:Raid - Sommaire.mp3
-92:The Kid LAROI - STAY.mp3
-93:Raste - Still Alive.mp3
-94:Post Malone - White Iverson.mp3
-95:Post Malone - Congratulations.mp3
-96:Cheb Hasni - Tal ghiyabek ya ghozali.mp3
-97:Amr Diab - Tamly Maak.mp3
-98:Kina - Tell Me About You.mp3
-99:Sting - Shape Of My Heart.mp3
-100:Drake - Toosie Slide.mp3
-101:DJ Snake - Turn Down for What.mp3
-102:Ahmet Kaya - Kum Gibi.mp3
-103:Ahmet Kaya - Ağladıkça.mp3
-104:Rihanna - Stay.mp3
-105:Ufuk Çalışkan - Unutmak İstiyorum.mp3
-106:Travis Scott - MY EYES.mp3
-107:Travis Scott - MELTDOWN (feat. Drake).mp3
-108:Travis Scott - I KNOW _.mp3
-109:Udit Narayan - Main Yahaan Hoon.mp3
-110:Drake - Hotline Bling.mp3
-111:Wael Kfoury - Baddi Yak.mp3
-112:DJ Khaled - I'm On One (Explicit Version).mp3
-113:Billie Eilish - bad guy.mp3
-114:Billie Eilish - when the party's over.mp3
-115:Kina - Wish I Was Better.mp3
-116:Duke - YA DENIA.mp3
-117:Inkonnu - YA Lili.mp3
-118:Dollypran - Yeah ho v4.mp3
-119:Ufuk Çalışkan - Yeni Limanlara.mp3
-120:Inkonnu - Zahri.mp3
-121:Abdullah Al Mukhles - اشكر جمالك.mp3
+0:Nouamane Belaiachi - Allo.mp3
+1:21 Savage - redrum.mp3
+2:TIF - AMNESIA.mp3
+3:Ahmed Spins - Anchor Point.mp3
+4:Travis Scott - SICKO MODE.mp3
+5:Shawty - Baby.mp3
+6:Travis Scott - goosebumps.mp3
+7:Rachid Taha - Ya Rayah.mp3
+8:Snor - De9a De9a.mp3
+9:Rayan - Goulou L'mama (feat. Jallal Hamdaoui).mp3
+10:Smallx - Dragon.mp3
+11:Elias - Eternity.mp3
+12:Fat Mizzo - Flakka.mp3
+13:Tagne - Flouka.mp3
+14:Tagne - Fratello.mp3
+15:Future - Mask Off.mp3
+16:Ice Cube - You Know How We Do It.mp3
+17:Ellie Goulding - Hate Me.mp3
+18:Travis Scott - HIGHEST IN THE ROOM.mp3
+19:Youness - I Love You.mp3
+20:Jackboys - OUT WEST (feat. Young Thug).mp3
+21:Jackboys - GATTI.mp3
+22:DaBaby - BOP.mp3
+23:7ARI - L'baida mon amour.mp3
+24:Snor - Lalala.mp3
+25:Juice WRLD - Legends.mp3
+26:Juice WRLD - Stay High.mp3
+27:Soolking - Liberté.mp3
+28:CKay - love nwantiti (feat. ElGrande Toto) (North African Remix).mp3
+29:Pop Smoke - Dior.mp3
+30:Pop Smoke - Invincible.mp3
+31:7ARI - Midaliya.mp3
+32:Duke - Mimti.mp3
+33:Adnan Sefiani - Wahed el ghouzatel.mp3
+34:Adnan Sefiani - Ay ya soltani.mp3
+35:Snor - Nasa (feat. Tagne & Stormy).mp3
+36:Faycel Sghir - Nebghik Ou Manbiyanhach.mp3
+37:Cheikha Rimitti - Nouar.mp3
+38:Madd - Pay No Mind.mp3
+39:Rohff - Mon bled.mp3
+40:Luciano - SHAWTY.mp3
+41:Pop Smoke - For The Night.mp3
+42:Pop Smoke - Mood Swings.mp3
+43:Pop Smoke - Hello.mp3
+44:Anys - Si tu savais.mp3
+45:7-Toun - Suzana.mp3
+46:Maher Zain - Ya Nabi Salam Alayka (Arabic Version - Bonus Track).mp3
+47:Polo G - 21.mp3
+48:Loun - Tnaket.mp3
+49:Lil Tecca - Did It Again.mp3
+50:Jack Harlow - WHATS POPPIN.mp3
+51:Saad Lamjarred - Ykhalik Lili.mp3
+52:Inkonnu - Zahri.mp3
+53:Samra - Zombie.mp3
+54:L7OR - حس بيا.mp3
 playlist_end
