@@ -42,15 +42,6 @@ servers = (
     tls_verify = "yes";
     autoconnect = "yes";
     starttls = "yes";
-  },
-  {
-    address = "irc.libera.chat";
-    chatnet = "LibreChat";
-    port = "6667";
-    use_tls = "no";
-    tls_verify = "yes";
-    autoconnect = "yes";
-    starttls = "yes";
   }
 );
 
