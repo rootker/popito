@@ -539,7 +539,7 @@ autoload -U ~/.zsh/function/**/*(N:t)
 #source <(carapace chmod zsh)
 #compinit _wa
 function vo(){
-	dir="~/.local/bin/"
+	dir="$HOME/.local/bin/"
 	vim $dir$@
 }
 zstyle ':completion:*' menu select
